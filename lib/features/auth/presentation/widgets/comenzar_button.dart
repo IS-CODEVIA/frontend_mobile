@@ -7,21 +7,22 @@ class ComenzarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white, width: 1.5),
+        side: BorderSide(color: colorScheme.onSecondary, width: 1.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
       ),
-      child: const Text(
+      child: Text(
         'Comenzar',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
+        style: textTheme.labelLarge?.copyWith(
+          color: colorScheme.onSecondary,
         ),
       ),
     );

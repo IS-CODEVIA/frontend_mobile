@@ -35,15 +35,19 @@ class AuthNotifier extends Notifier<AuthState> {
   AuthState build() => const AuthState();
 
   void goToLogin() {
-    state = state.copyWith(status: AuthStatus.unauthenticated);
+    state = state.copyWith(status: AuthStatus.unauthenticated, error: null);
   }
 
   void goToHome() {
-    state = state.copyWith(status: AuthStatus.authenticated);
+    state = state.copyWith(status: AuthStatus.authenticated, error: null);
   }
 
   void logout() {
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  void clearError() {
+    state = state.copyWith(error: null);
   }
 }
 
