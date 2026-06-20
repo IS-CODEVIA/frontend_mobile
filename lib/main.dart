@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ProviderScope(
+      child: DevicePreview(
+        enabled: kIsWeb,
+        builder: (context) => const MyApp(),
+      ),
+    ),
+  );
 }
+
 
