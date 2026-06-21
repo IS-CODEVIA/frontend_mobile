@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class CustomTextField extends StatelessWidget {
   final String label;
   final bool isPassword;
+  final TextEditingController? controller;
+  final bool compact;
 
   const CustomTextField({
     super.key,
     required this.label,
     this.isPassword = false,
+    this.controller,
+    this.compact = false,
   });
 
   @override
@@ -24,11 +28,15 @@ class CustomTextField extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: compact ? 4 : 8),
         TextField(
+          controller: controller,
           obscureText: isPassword,
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: compact ? 8 : 14,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: colorScheme.secondary),

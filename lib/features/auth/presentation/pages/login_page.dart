@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../riverpod/auth_riverpod.dart';
 import '../widgets/welcome_background.dart';
 import '../widgets/role_selector_button.dart';
 import '../widgets/custom_text_field.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool _isStudent = true;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final authState = ref.watch(authViewModelProvider);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -44,15 +41,15 @@ class _LoginPageState extends State<LoginPage> {
                       RoleSelectorButton(
                         title: 'Docente',
                         icon: Icons.person_outline,
-                        isSelected: !_isStudent,
-                        onTap: () => setState(() => _isStudent = false),
+                        isSelected: !authState.isStudent,
+                        onTap: () => ref.read(authViewModelProvider.notifier).setRole(false),
                       ),
                       const SizedBox(width: 16),
                       RoleSelectorButton(
                         title: 'Alumno',
                         icon: Icons.school_outlined,
-                        isSelected: _isStudent,
-                        onTap: () => setState(() => _isStudent = true),
+                        isSelected: authState.isStudent,
+                        onTap: () => ref.read(authViewModelProvider.notifier).setRole(true),
                       ),
                     ],
                   ),
@@ -71,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
-                        'Forgot Password?',
+                        'Olvidaste tu contraseña?',
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.bold,
@@ -108,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
             bottom: 56,
             left: 32,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () => context.goNamed('register'),
               child: RichText(
                 text: TextSpan(
                   text: 'Sin cuenta? ',
