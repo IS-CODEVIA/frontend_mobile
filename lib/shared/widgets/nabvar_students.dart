@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class NavbarStudents extends StatelessWidget {
   const NavbarStudents({super.key});
@@ -34,11 +35,11 @@ class NavbarStudents extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
             ),
-            _buildMenuItem('Asignaturas', Icons.menu_book_rounded, itemStyle, () {}),
+            _buildMenuItem('Asignaturas', Icons.menu_book_rounded, itemStyle, () => context.goNamed('home')),
             const SizedBox(height: 16),
-            _buildMenuItem('Avisos', Icons.mail_outline_rounded, itemStyle, () {}),
+            _buildMenuItem('Avisos', Icons.mail_outline_rounded, itemStyle, () => context.goNamed('notices')),
             const SizedBox(height: 16),
-            _buildMenuItem('Archivadas', Icons.archive_outlined, itemStyle, () {}),
+            _buildMenuItem('Archivadas', Icons.archive_outlined, itemStyle, () => context.goNamed('archived')),
             const Spacer(),
             Container(
               width: double.infinity,
