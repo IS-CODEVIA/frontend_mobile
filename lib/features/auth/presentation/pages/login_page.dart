@@ -85,7 +85,11 @@ class LoginPage extends ConsumerWidget {
             bottom: 48,
             right: 32,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: () {
+                if (authState.isStudent) {
+                  context.goNamed('home');
+                }
+              },
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: colorScheme.onSecondary, width: 1.5),
                 shape: RoundedRectangleBorder(
