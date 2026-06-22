@@ -358,6 +358,18 @@ class MaterialTheme {
   List<ExtendedColor> get extendedColors => [];
 }
 
+extension SubjectCardThemeX on ThemeData {
+  Color subjectCardBackground(int seed) {
+    const colors = <Color>[
+      Color(0xff00CFBB),
+      Color(0xffC7622B),
+      Color(0xff1C258F),
+      Color(0xff006b60),
+    ];
+    return colors[seed % colors.length];
+  }
+}
+
 class ExtendedColor {
   final Color seed, value;
   final ColorFamily light;

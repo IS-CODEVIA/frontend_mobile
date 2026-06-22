@@ -17,44 +17,40 @@ class HeaderStudents extends StatelessWidget {
         child: SizedBox(
           height: 110,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0), // Reducido un poco para hacer espacio
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // NUEVO: Fila con el menú de hamburguesa y el logo
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
-                        Icons.menu, 
-                        color: Colors.white,
+                      icon: Icon(
+                        Icons.menu,
+                        color: colorScheme.onPrimary,
                         size: 28,
                       ),
                       onPressed: () {
-                        // Esto abre el Drawer mágicamente
                         Scaffold.of(context).openDrawer();
                       },
                     ),
                     const SizedBox(width: 8),
                     Image.asset(
                       'assets/images/up_logo_2.png',
-                      height: 40, // Ligeramente más pequeño para convivir con el ícono
+                      height: 40,
                       fit: BoxFit.contain,
                     ),
                   ],
                 ),
-                
-                // Foto de perfil (se queda igual)
                 Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onPrimary,
                     shape: BoxShape.circle,
                   ),
                   child: CircleAvatar(
                     radius: 24,
-                    backgroundColor: colorScheme.surfaceVariant,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
                     child: Icon(
                       Icons.person,
                       size: 30,
@@ -70,7 +66,6 @@ class HeaderStudents extends StatelessWidget {
     );
   }
 }
-
 
 class _HeaderPainter extends CustomPainter {
   final Color primaryColor;
@@ -91,30 +86,24 @@ class _HeaderPainter extends CustomPainter {
       ..color = secondaryColor
       ..style = PaintingStyle.fill;
 
-    // 1. Onda Superior Teal (Fondo)
     final pathTeal = Path();
     pathTeal.moveTo(0, 0);
-    // Baja por la izquierda casi hasta el fondo del widget
     pathTeal.lineTo(0, size.height * 0.95);
-    // Curva hacia la derecha
     pathTeal.cubicTo(
-      size.width * 0.35, size.height * 1.05, 
-      size.width * 0.65, size.height * 0.55, 
+      size.width * 0.35, size.height * 1.05,
+      size.width * 0.65, size.height * 0.55,
       size.width, size.height * 0.75,
     );
     pathTeal.lineTo(size.width, 0);
     pathTeal.close();
     canvas.drawPath(pathTeal, paintTeal);
 
-    // 2. Onda Superior Azul Oscuro (Frente)
     final pathBlue = Path();
     pathBlue.moveTo(0, 0);
-    // Baja por la izquierda pero un poco menos que la onda Teal
     pathBlue.lineTo(0, size.height * 0.85);
-    // Curva "S" pronunciada hacia arriba a la derecha
     pathBlue.cubicTo(
-      size.width * 0.45, size.height * 0.85, 
-      size.width * 0.65, size.height * 0.25, 
+      size.width * 0.45, size.height * 0.85,
+      size.width * 0.65, size.height * 0.25,
       size.width, size.height * 0.25,
     );
     pathBlue.lineTo(size.width, 0);

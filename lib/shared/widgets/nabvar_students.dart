@@ -8,15 +8,14 @@ class NavbarStudents extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // Estilo base para el texto del menú
     final itemStyle = textTheme.titleMedium?.copyWith(
-      color: Colors.white,
+      color: colorScheme.onSecondary,
       fontWeight: FontWeight.w600,
       fontSize: 18,
     );
 
     return Drawer(
-      backgroundColor: colorScheme.secondary, // Fondo azul oscuro
+      backgroundColor: colorScheme.secondary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(30),
@@ -27,7 +26,6 @@ class NavbarStudents extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Logo superior
             Padding(
               padding: const EdgeInsets.only(left: 32.0, top: 32.0, bottom: 48.0),
               child: Image.asset(
@@ -36,29 +34,24 @@ class NavbarStudents extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
             ),
-            
-            // Sección Principal
-            _buildMenuItem('Asignaturas', itemStyle, () {}),
+            _buildMenuItem('Asignaturas', Icons.menu_book_rounded, itemStyle, () {}),
             const SizedBox(height: 16),
-            _buildMenuItem('Avisos', itemStyle, () {}),
+            _buildMenuItem('Avisos', Icons.mail_outline_rounded, itemStyle, () {}),
             const SizedBox(height: 16),
-            _buildMenuItem('Archivadas', itemStyle, () {}),
-            
-            const Spacer(), // Empuja el resto de elementos hacia abajo
-            
-            // Sección Inferior (con un sutil fondo más oscuro como en tu diseño)
+            _buildMenuItem('Archivadas', Icons.archive_outlined, itemStyle, () {}),
+            const Spacer(),
             Container(
               width: double.infinity,
-              color: Colors.black.withOpacity(0.15), 
+              color: colorScheme.scrim.withValues(alpha: 0.15),
               padding: const EdgeInsets.only(top: 24.0, bottom: 32.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMenuItem('Archivos offline', itemStyle, () {}),
+                  _buildMenuItem('Archivos offline', Icons.download_rounded, itemStyle, () {}),
                   const SizedBox(height: 16),
-                  _buildMenuItem('Configuracion', itemStyle, () {}),
+                  _buildMenuItem('Configuracion', Icons.settings_outlined, itemStyle, () {}),
                   const SizedBox(height: 16),
-                  _buildMenuItem('Ayuda', itemStyle, () {}),
+                  _buildMenuItem('Ayuda', Icons.help_outline_rounded, itemStyle, () {}),
                 ],
               ),
             ),
@@ -68,15 +61,23 @@ class NavbarStudents extends StatelessWidget {
     );
   }
 
-  // Widget reutilizable para cada elemento de la lista
-  Widget _buildMenuItem(String title, TextStyle? style, VoidCallback onTap) {
+  Widget _buildMenuItem(
+    String title,
+    IconData icon,
+    TextStyle? style,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0),
-        child: Text(
-          title,
-          style: style,
+        padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 10.0),
+        child: Row(
+          children: [
+            Icon(icon, color: style?.color, size: 24),
+            const SizedBox(width: 16),
+            Text(title, style: style),
+          ],
         ),
       ),
     );
