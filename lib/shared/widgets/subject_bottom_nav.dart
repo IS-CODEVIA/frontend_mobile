@@ -46,7 +46,12 @@ class SubjectBottomNav extends StatelessWidget {
                           pathParameters: {'subjectName': subjectName},
                         );
                       }),
-                      _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {}),
+                      _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {
+                        context.goNamed(
+                          'material-students',
+                          pathParameters: {'subjectName': subjectName},
+                        );
+                      }),
                     ],
                   ),
                 ),
