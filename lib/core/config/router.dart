@@ -9,6 +9,7 @@ import '../../features/home_student/presentation/pages/home_students_page.dart';
 import '../../features/transcriptor_student/presentation/pages/transcriptor_student_page.dart';
 import '../../features/assignment_notices/presentation/pages/assignment_notices_page.dart';
 import '../../features/material_students/presentation/pages/material_students_page.dart';
+import '../../features/people_student/presentation/pages/people_student_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -65,6 +66,14 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
         return TranscriptorStudentPage(subjectName: subjectName);
+      },
+    ),
+    GoRoute(
+      path: '/people-student/:subjectName',
+      name: 'people-student',
+      builder: (context, state) {
+        final subjectName = state.pathParameters['subjectName']!;
+        return PeopleStudentPage(subjectName: subjectName);
       },
     ),
   ],

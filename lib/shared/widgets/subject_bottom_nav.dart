@@ -69,7 +69,12 @@ class SubjectBottomNav extends StatelessWidget {
                     text: 'Personas',
                     icon: Icons.people_outline,
                     style: itemStyle,
-                    onTap: () {},
+                    onTap: () {
+                      context.goNamed(
+                        'people-student',
+                        pathParameters: {'subjectName': subjectName},
+                      );
+                    },
                   ),
                 ),
               ),
