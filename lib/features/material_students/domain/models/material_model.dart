@@ -9,6 +9,8 @@ class MaterialItemModel {
   final String description;
   final String date;
   final MaterialItemType type;
+  final String unitName; // Para mostrar "Unidad 1" en el detalle
+  final String content;
 
   MaterialItemModel({
     required this.id,
@@ -16,6 +18,8 @@ class MaterialItemModel {
     this.description = '',
     required this.date,
     required this.type,
+    required this.unitName,
+    required this.content,
   });
 }
 

@@ -252,6 +252,8 @@ class _AddMaterialSheetState extends ConsumerState<AddMaterialSheet> {
         description: _descController.text.trim(),
         date: '${DateTime.now().day} ${_monthName(DateTime.now().month)} ${DateTime.now().year}',
         type: MaterialItemType.document,
+        unitName: unitName,
+        content: _descController.text.trim(),
       ),
     );
     Navigator.pop(context);

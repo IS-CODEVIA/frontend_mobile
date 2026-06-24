@@ -58,7 +58,7 @@ class MaterialProfessorPage extends ConsumerWidget {
                   ),
                 ),
                 
-                ...unitsData.map((unit) => UnitMaterialSection(unitModel: unit)),
+                ...unitsData.map((unit) => UnitMaterialSection(unitModel: unit, subjectName: subjectName)),
                 
                 const SizedBox(height: 40),
               ],

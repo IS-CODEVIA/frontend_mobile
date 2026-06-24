@@ -4,8 +4,9 @@ import 'material_list_item.dart';
 
 class UnitMaterialSection extends StatelessWidget {
   final UnitMaterialsModel unitModel;
+  final String subjectName;
 
-  const UnitMaterialSection({super.key, required this.unitModel});
+  const UnitMaterialSection({super.key, required this.unitModel, required this.subjectName});
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +37,7 @@ class UnitMaterialSection extends StatelessWidget {
             itemBuilder: (context, index) {
               return MaterialListItem(
                 item: unitModel.materials[index],
+                subjectName: subjectName,
               );
             },
           ),

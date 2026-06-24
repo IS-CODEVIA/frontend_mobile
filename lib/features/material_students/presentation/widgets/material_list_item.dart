@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../domain/models/material_model.dart';
+import '../pages/material_detail_page.dart';
 
 class MaterialListItem extends StatefulWidget {
   final MaterialItemModel item;
+  final String subjectName;
 
-  const MaterialListItem({super.key, required this.item});
+  const MaterialListItem({super.key, required this.item, required this.subjectName});
 
   @override
   State<MaterialListItem> createState() => _MaterialListItemState();
@@ -138,24 +140,37 @@ class _MaterialListItemState extends State<MaterialListItem>
                             ),
                           ),
                         ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.open_in_new_rounded,
-                            size: 16,
-                            color: colorScheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            widget.item.type == MaterialItemType.transcription
-                                ? 'Ver transcripción completa'
-                                : 'Ver material completo',
-                            style: textTheme.labelLarge?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w600,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MaterialDetailPage(
+                                material: widget.item,
+                                subjectName: widget.subjectName,
+                              ),
                             ),
-                          ),
-                        ],
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.open_in_new_rounded,
+                              size: 16,
+                              color: colorScheme.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.item.type == MaterialItemType.transcription
+                                  ? 'Ver transcripción completa'
+                                  : 'Ver material completo',
+                              style: textTheme.labelLarge?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
