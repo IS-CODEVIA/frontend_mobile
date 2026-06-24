@@ -6,6 +6,7 @@ import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/archived/presentation/pages/archived_page.dart';
 import '../../features/general_noticies/presentation/pages/notices_page.dart';
 import '../../features/home_student/presentation/pages/home_students_page.dart';
+import '../../features/transcriptor_student/presentation/pages/transcriptor_student_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -39,6 +40,14 @@ final appRouter = GoRouter(
       path: '/archived',
       name: 'archived',
       builder: (context, state) => const ArchivedPage(),
+    ),
+    GoRoute(
+      path: '/transcriptor/:subjectName',
+      name: 'transcriptor',
+      builder: (context, state) {
+        final subjectName = state.pathParameters['subjectName']!;
+        return TranscriptorStudentPage(subjectName: subjectName);
+      },
     ),
   ],
 );
