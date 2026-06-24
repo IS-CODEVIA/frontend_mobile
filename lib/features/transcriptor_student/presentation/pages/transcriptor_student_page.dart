@@ -8,6 +8,7 @@ import '../../../../shared/widgets/subject_bottom_nav.dart';
 import '../riverpod/transcription_riverpod.dart';
 import '../widgets/live_status_indicator.dart';
 import '../widgets/transcription_box.dart';
+import '../widgets/chat_sheet.dart';
 
 class TranscriptorStudentPage extends ConsumerWidget {
   final String subjectName;
@@ -56,7 +57,7 @@ class TranscriptorStudentPage extends ConsumerWidget {
                     child: TranscriptionBox(messages: transcriptionMessages),
                   ),
                   
-                  // Botón para pedir la palabra (Levantar la mano)
+                  // Botón para abrir chat con el docente
                   Align(
                     alignment: Alignment.centerRight,
                     child: Padding(
@@ -66,7 +67,12 @@ class TranscriptorStudentPage extends ConsumerWidget {
                         color: colorScheme.onSurface,
                         iconSize: 32,
                         onPressed: () {
-                          // Acción de levantar la mano
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (_) => const ChatSheet(),
+                          );
                         },
                       ),
                     ),

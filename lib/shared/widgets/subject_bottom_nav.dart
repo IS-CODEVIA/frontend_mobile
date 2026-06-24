@@ -17,7 +17,7 @@ class SubjectBottomNav extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: SizedBox(
-          height: 60,
+          height: 72,
           child: Row(
             children: [
               // Píldora Turquesa (Primary)
@@ -31,9 +31,9 @@ class SubjectBottomNav extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _NavItem(text: 'Avisos', style: itemStyle, onTap: () {}),
-                      _NavItem(text: 'Transcriptor', style: itemStyle, onTap: () {}),
-                      _NavItem(text: 'Material', style: itemStyle, onTap: () {}),
+                      _NavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {}),
+                      _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {}),
+                      _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {}),
                     ],
                   ),
                 ),
@@ -42,15 +42,16 @@ class SubjectBottomNav extends StatelessWidget {
               // Botón Azul Oscuro (Secondary)
               Expanded(
                 flex: 1,
-                child: InkWell(
-                  onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text('Personas', style: itemStyle),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _NavItem(
+                    text: 'Personas',
+                    icon: Icons.people_outline,
+                    style: itemStyle,
+                    onTap: () {},
                   ),
                 ),
               ),
@@ -64,18 +65,26 @@ class SubjectBottomNav extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   final String text;
+  final IconData icon;
   final TextStyle? style;
   final VoidCallback onTap;
 
-  const _NavItem({required this.text, required this.style, required this.onTap});
+  const _NavItem({required this.text, required this.icon, required this.style, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-        child: Text(text, style: style),
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: style?.color, size: 20),
+            const SizedBox(height: 2),
+            Text(text, style: style?.copyWith(fontSize: 11)),
+          ],
+        ),
       ),
     );
   }
