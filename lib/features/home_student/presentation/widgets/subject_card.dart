@@ -17,7 +17,7 @@ class SubjectCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => context.goNamed(
-        'transcriptor',
+        'assignment-notices',
         pathParameters: {'subjectName': subject.title},
       ),
       child: Container(

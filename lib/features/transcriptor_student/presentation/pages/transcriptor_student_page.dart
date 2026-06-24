@@ -24,7 +24,7 @@ class TranscriptorStudentPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarStudents(), 
-      bottomNavigationBar: const SubjectBottomNav(),
+      bottomNavigationBar: SubjectBottomNav(subjectName: subjectName),
 
       body: Column(
         children: [

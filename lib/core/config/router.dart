@@ -7,6 +7,7 @@ import '../../features/archived/presentation/pages/archived_page.dart';
 import '../../features/general_noticies/presentation/pages/notices_page.dart';
 import '../../features/home_student/presentation/pages/home_students_page.dart';
 import '../../features/transcriptor_student/presentation/pages/transcriptor_student_page.dart';
+import '../../features/assignment_notices/presentation/pages/assignment_notices_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -40,6 +41,14 @@ final appRouter = GoRouter(
       path: '/archived',
       name: 'archived',
       builder: (context, state) => const ArchivedPage(),
+    ),
+    GoRoute(
+      path: '/assignment-notices/:subjectName',
+      name: 'assignment-notices',
+      builder: (context, state) {
+        final subjectName = state.pathParameters['subjectName']!;
+        return AssignmentNoticesPage(subjectName: subjectName);
+      },
     ),
     GoRoute(
       path: '/transcriptor/:subjectName',

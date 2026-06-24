@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SubjectBottomNav extends StatelessWidget {
-  const SubjectBottomNav({super.key});
+  final String subjectName;
+
+  const SubjectBottomNav({super.key, required this.subjectName});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +34,18 @@ class SubjectBottomNav extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _NavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {}),
-                      _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {}),
+                      _NavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {
+                        context.goNamed(
+                          'assignment-notices',
+                          pathParameters: {'subjectName': subjectName},
+                        );
+                      }),
+                      _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {
+                        context.goNamed(
+                          'transcriptor',
+                          pathParameters: {'subjectName': subjectName},
+                        );
+                      }),
                       _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {}),
                     ],
                   ),
