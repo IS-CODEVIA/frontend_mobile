@@ -88,6 +88,8 @@ class LoginPage extends ConsumerWidget {
               onPressed: () {
                 if (authState.isStudent) {
                   context.goNamed('home');
+                } else {
+                  context.goNamed('professor-home');
                 }
               },
               style: OutlinedButton.styleFrom(
