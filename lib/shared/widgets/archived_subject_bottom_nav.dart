@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class SubjectBottomNav extends StatelessWidget {
+class ArchivedSubjectBottomNav extends StatelessWidget {
   final String subjectName;
 
-  const SubjectBottomNav({super.key, required this.subjectName});
+  const ArchivedSubjectBottomNav({super.key, required this.subjectName});
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +35,13 @@ class SubjectBottomNav extends StatelessWidget {
                     children: [
                       _NavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {
                         context.goNamed(
-                          'assignment-notices',
-                          pathParameters: {'subjectName': subjectName},
-                        );
-                      }),
-                      _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {
-                        context.goNamed(
-                          'transcriptor',
+                          'archived-assignment-notices',
                           pathParameters: {'subjectName': subjectName},
                         );
                       }),
                       _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {
                         context.goNamed(
-                          'material-students',
+                          'archived-material-students',
                           pathParameters: {'subjectName': subjectName},
                         );
                       }),
@@ -69,7 +63,7 @@ class SubjectBottomNav extends StatelessWidget {
                     style: itemStyle,
                     onTap: () {
                       context.goNamed(
-                        'people-student',
+                        'archived-people-student',
                         pathParameters: {'subjectName': subjectName},
                       );
                     },
