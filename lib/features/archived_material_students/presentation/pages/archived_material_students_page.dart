@@ -3,15 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
-import '../../../../shared/widgets/subject_bottom_nav.dart';
+import '../../../../shared/widgets/archived_subject_bottom_nav.dart';
 
-import '../riverpod/materials_riverpod.dart';
-import '../widgets/unit_material_section.dart';
+import '../../../../features/material_students/presentation/riverpod/materials_riverpod.dart';
+import '../../../../features/material_students/presentation/widgets/unit_material_section.dart';
 
-class MaterialStudentsPage extends ConsumerWidget {
+class ArchivedMaterialStudentsPage extends ConsumerWidget {
   final String subjectName;
 
-  const MaterialStudentsPage({super.key, required this.subjectName});
+  const ArchivedMaterialStudentsPage({super.key, required this.subjectName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,7 +22,7 @@ class MaterialStudentsPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarStudents(), 
-      bottomNavigationBar: SubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: ArchivedSubjectBottomNav(subjectName: subjectName),
       body: Column(
         children: [
           const HeaderStudents(),

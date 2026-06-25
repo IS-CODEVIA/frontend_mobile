@@ -46,19 +46,17 @@ class PeopleStudentPage extends ConsumerWidget {
                   ),
                 ),
                 
-                // Sección del Profesor
                 RoleSection(
                   title: 'Profesor',
                   people: teachers,
                 ),
                 
-                // Sección de Alumnos
                 RoleSection(
                   title: 'Alumnos',
                   people: students,
                 ),
                 
-                const SizedBox(height: 40), // Espaciado final
+                const SizedBox(height: 40),
               ],
             ),
           ),

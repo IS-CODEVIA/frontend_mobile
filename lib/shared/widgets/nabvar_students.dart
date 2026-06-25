@@ -52,13 +52,67 @@ class NavbarStudents extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildMenuItem('Configuracion', Icons.settings_outlined, itemStyle, () => context.goNamed('settings')),
                   const SizedBox(height: 16),
-                  _buildMenuItem('Ayuda', Icons.help_outline_rounded, itemStyle, () {}),
+                  _buildMenuItem('Ayuda', Icons.help_outline_rounded, itemStyle, () => _showHelpModal(context)),
+                  const SizedBox(height: 16),
+                  _buildMenuItem('Cerrar sesión', Icons.logout_rounded, itemStyle, () => context.goNamed('login')),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showHelpModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Icon(Icons.help_outline, color: Theme.of(context).colorScheme.secondary),
+            const SizedBox(width: 12),
+            const Text('Ayuda'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _helpSection('Asignaturas', 'Visualiza y gestiona tus materias activas. Toca una asignatura para ver sus avisos, material y compañeros.'),
+              const SizedBox(height: 16),
+              _helpSection('Avisos', 'Consulta los anuncios publicados por tus profesores en cada materia.'),
+              const SizedBox(height: 16),
+              _helpSection('Archivadas', 'Accede a materias de ciclos anteriores. Toca una para consultar su información.'),
+              const SizedBox(height: 16),
+              _helpSection('Material', 'Descarga y revisa los materiales de estudio por unidad.'),
+              const SizedBox(height: 16),
+              _helpSection('Personas', 'Conoce a los integrantes de cada clase: profesores y compañeros.'),
+              const SizedBox(height: 16),
+              _helpSection('Configuracion', 'Personaliza tu perfil, foto, notificaciones y preferencias de la app.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Entendido'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _helpSection(String title, String description) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        const SizedBox(height: 4),
+        Text(description, style: const TextStyle(fontSize: 13)),
+      ],
     );
   }
 
