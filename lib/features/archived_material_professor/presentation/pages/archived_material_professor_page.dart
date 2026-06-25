@@ -3,16 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets_professor/header_professors.dart';
 import '../../../../shared/widgets_professor/navbar_professors.dart';
-import '../../../../shared/widgets_professor/professor_subject_bottom_nav.dart';
+import '../../../../shared/widgets_professor/archived_professor_subject_bottom_nav.dart';
 
 import '../../../../features/material_students/presentation/riverpod/materials_riverpod.dart';
 import '../../../../features/material_students/presentation/widgets/unit_material_section.dart';
-import '../../../../features/material_students/presentation/widgets/add_material_sheet.dart';
 
-class MaterialProfessorPage extends ConsumerWidget {
+class ArchivedMaterialProfessorPage extends ConsumerWidget {
   final String subjectName;
 
-  const MaterialProfessorPage({super.key, required this.subjectName});
+  const ArchivedMaterialProfessorPage({super.key, required this.subjectName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,34 +21,16 @@ class MaterialProfessorPage extends ConsumerWidget {
     final unitsData = ref.watch(materialsProvider);
 
     return Scaffold(
-      drawer: const NavbarProfessors(), 
-      bottomNavigationBar: ProfessorSubjectBottomNav(subjectName: subjectName),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => const AddMaterialSheet(),
-          );
-        },
-        backgroundColor: colorScheme.secondary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Icon(Icons.add, color: colorScheme.onSecondary, size: 32),
-      ),
+      drawer: const NavbarProfessors(),
+      bottomNavigationBar: ArchivedProfessorSubjectBottomNav(subjectName: subjectName),
       body: Column(
         children: [
           const HeaderProfessors(),
-          
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               children: [
                 const SizedBox(height: 16),
-                
                 Text(
                   subjectName,
                   style: textTheme.headlineMedium?.copyWith(
@@ -57,9 +38,7 @@ class MaterialProfessorPage extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                
                 ...unitsData.map((unit) => UnitMaterialSection(unitModel: unit, subjectName: subjectName)),
-                
                 const SizedBox(height: 40),
               ],
             ),

@@ -5,51 +5,37 @@ import '../../../../shared/widgets_professor/header_professors.dart';
 import '../../../../shared/widgets_professor/navbar_professors.dart';
 import '../../../../shared/widgets_professor/professor_subject_bottom_nav.dart';
 
-import '../../../../features/material_students/presentation/riverpod/materials_riverpod.dart';
-import '../../../../features/material_students/presentation/widgets/unit_material_section.dart';
-import '../../../../features/material_students/presentation/widgets/add_material_sheet.dart';
+import '../../domain/models/person_model.dart';
+import '../riverpod/people_professor_riverpod.dart';
+import '../widgets/role_section.dart';
 
-class MaterialProfessorPage extends ConsumerWidget {
+class PeopleProfessorPage extends ConsumerWidget {
   final String subjectName;
 
-  const MaterialProfessorPage({super.key, required this.subjectName});
+  const PeopleProfessorPage({super.key, required this.subjectName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final unitsData = ref.watch(materialsProvider);
+    final allPeople = ref.watch(professorPeopleProvider);
+
+    final teachers = allPeople.where((p) => p.role == ClassRole.teacher).toList();
+    final students = allPeople.where((p) => p.role == ClassRole.student).toList();
 
     return Scaffold(
-      drawer: const NavbarProfessors(), 
+      drawer: const NavbarProfessors(),
       bottomNavigationBar: ProfessorSubjectBottomNav(subjectName: subjectName),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => const AddMaterialSheet(),
-          );
-        },
-        backgroundColor: colorScheme.secondary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Icon(Icons.add, color: colorScheme.onSecondary, size: 32),
-      ),
       body: Column(
         children: [
           const HeaderProfessors(),
-          
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               children: [
                 const SizedBox(height: 16),
-                
                 Text(
                   subjectName,
                   style: textTheme.headlineMedium?.copyWith(
@@ -57,9 +43,8 @@ class MaterialProfessorPage extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                
-                ...unitsData.map((unit) => UnitMaterialSection(unitModel: unit, subjectName: subjectName)),
-                
+                RoleSection(title: 'Profesor', people: teachers),
+                RoleSection(title: 'Alumnos', people: students),
                 const SizedBox(height: 40),
               ],
             ),
