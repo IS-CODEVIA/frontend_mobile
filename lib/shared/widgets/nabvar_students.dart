@@ -50,7 +50,7 @@ class NavbarStudents extends StatelessWidget {
                 children: [
                   _buildMenuItem('Archivos offline', Icons.download_rounded, itemStyle, () {}),
                   const SizedBox(height: 16),
-                  _buildMenuItem('Configuracion', Icons.settings_outlined, itemStyle, () {}),
+                  _buildMenuItem('Configuracion', Icons.settings_outlined, itemStyle, () => context.goNamed('settings')),
                   const SizedBox(height: 16),
                   _buildMenuItem('Ayuda', Icons.help_outline_rounded, itemStyle, () {}),
                 ],
