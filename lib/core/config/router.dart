@@ -177,6 +177,7 @@ final appRouter = GoRouter(
         return MaterialProfessorPage(
           subjectName: subjectName,
           courseId: extra?['courseId'] as int? ?? 0,
+          joinCode: extra?['joinCode'] as String?,
         );
       },
     ),
@@ -189,6 +190,7 @@ final appRouter = GoRouter(
         return TranscriptorProfessorPage(
           subjectName: subjectName,
           courseId: extra?['courseId'] as int? ?? 0,
+          joinCode: extra?['joinCode'] as String?,
         );
       },
     ),
@@ -201,6 +203,7 @@ final appRouter = GoRouter(
         return PeopleProfessorPage(
           subjectName: subjectName,
           courseId: extra?['courseId'] as int? ?? 0,
+          joinCode: extra?['joinCode'] as String?,
         );
       },
     ),

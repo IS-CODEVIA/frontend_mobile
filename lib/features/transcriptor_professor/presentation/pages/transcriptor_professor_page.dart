@@ -11,11 +11,13 @@ import '../widgets/chat_sheet.dart';
 class TranscriptorProfessorPage extends ConsumerWidget {
   final String subjectName;
   final int courseId;
+  final String? joinCode;
 
   const TranscriptorProfessorPage({
     super.key,
     required this.subjectName,
     required this.courseId,
+    this.joinCode,
   });
 
   @override
@@ -28,6 +30,7 @@ class TranscriptorProfessorPage extends ConsumerWidget {
       bottomNavigationBar: ProfessorSubjectBottomNav(
         subjectName: subjectName,
         courseId: courseId,
+        joinCode: joinCode,
       ),
       body: Column(
         children: [
@@ -46,6 +49,44 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (joinCode != null && joinCode!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.key_rounded,
+                            size: 16,
+                            color: colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Código de clase: ',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            joinCode!,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Row(
                     children: [

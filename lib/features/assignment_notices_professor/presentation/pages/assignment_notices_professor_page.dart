@@ -51,6 +51,7 @@ class _AssignmentNoticesProfessorPageState
       bottomNavigationBar: ProfessorSubjectBottomNav(
         subjectName: widget.subjectName,
         courseId: widget.courseId,
+        joinCode: widget.joinCode,
       ),
       body: Column(
         children: [

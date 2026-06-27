@@ -60,11 +60,10 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
   @override
   HomeStudentState build() {
     loadEnrollments();
-    return const HomeStudentState(isLoading: true);
+    return const HomeStudentState();
   }
 
   Future<void> loadEnrollments() async {
-    state = state.copyWith(isLoading: true, error: null);
     try {
       final enrollments = await ref.read(_getMyEnrollmentsUsecaseProvider)();
       final subjects = enrollments
@@ -80,11 +79,10 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
             ),
           )
           .toList();
-      state = state.copyWith(isLoading: false, subjects: subjects);
+      state = state.copyWith(subjects: subjects);
     } catch (e, st) {
       debugPrint('loadEnrollments error: $e\n$st');
       state = state.copyWith(
-        isLoading: false,
         error: e.toString(),
       );
     }

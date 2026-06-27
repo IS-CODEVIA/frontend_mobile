@@ -90,10 +90,6 @@ class HomeStudentsPage extends ConsumerWidget {
     TextTheme textTheme,
     WidgetRef ref,
   ) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     if (state.error != null && subjects.isEmpty) {
       return Center(
         child: Padding(
