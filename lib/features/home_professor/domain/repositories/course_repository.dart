@@ -6,5 +6,6 @@ abstract class CourseRepository {
     required String courseName,
     required String section,
     required String period,
+    required int subjectId,
   });
 }

@@ -11,11 +11,13 @@ class CreateCourseUsecase {
     required String courseName,
     required String section,
     required String period,
+    required int subjectId,
   }) {
     return _repository.createCourse(
       courseName: courseName,
       section: section,
       period: period,
+      subjectId: subjectId,
     );
   }
 }

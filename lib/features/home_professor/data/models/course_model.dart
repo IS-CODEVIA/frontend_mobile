@@ -33,7 +33,7 @@ class CourseModel {
       subjectId: json['subjectID'] as int,
       teacherId: json['teacherID'] as int,
       createdAt: json['createdAt'] as String,
-      updatedAt: json['updatedAt'] as String,
+      updatedAt: json['updatedAt'] as String?,
     );
   }
 

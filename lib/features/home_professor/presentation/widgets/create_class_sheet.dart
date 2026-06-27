@@ -14,6 +14,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
   final _nameController = TextEditingController();
   final _sectionController = TextEditingController();
   final _periodController = TextEditingController();
+  final _subjectIdController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -22,6 +23,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     _nameController.dispose();
     _sectionController.dispose();
     _periodController.dispose();
+    _subjectIdController.dispose();
     super.dispose();
   }
 
@@ -31,7 +33,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.52,
+      height: MediaQuery.of(context).size.height * 0.6,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -72,8 +74,6 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                     icon: Icons.menu_book_rounded,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Requerido' : null,
                   ),
                   const SizedBox(height: 16),
                   _buildField(
@@ -83,8 +83,6 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                     icon: Icons.group_rounded,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Requerido' : null,
                   ),
                   const SizedBox(height: 16),
                   _buildField(
@@ -94,8 +92,16 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                     icon: Icons.calendar_today_rounded,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Requerido' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    label: 'ID de materia',
+                    hint: 'Ej. 1',
+                    controller: _subjectIdController,
+                    icon: Icons.tag_rounded,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    keyboardType: TextInputType.number,
                   ),
                 ],
               ),
@@ -172,7 +178,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     required IconData icon,
     required ColorScheme colorScheme,
     required TextTheme textTheme,
-    String? Function(String?)? validator,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +199,8 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          validator: validator,
+          keyboardType: keyboardType,
+          validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
           style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: hint,
@@ -220,14 +227,19 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
 
     setState(() => _isLoading = true);
 
-    final courseName = _nameController.text.trim();
-    final section = _sectionController.text.trim();
-    final period = _periodController.text.trim();
+    final subjectId = int.tryParse(_subjectIdController.text.trim());
+    if (subjectId == null) {
+      setState(() => _isLoading = false);
+      _showErrorDialog(context, 'El ID de materia debe ser un número.');
+      return;
+    }
 
-    final result = await ref.read(professorSubjectsProvider.notifier).createCourse(
-          courseName: courseName,
-          section: section,
-          period: period,
+    final result = await ref.read(professorSubjectsProvider.notifier)
+        .createCourse(
+          courseName: _nameController.text.trim(),
+          section: _sectionController.text.trim(),
+          period: _periodController.text.trim(),
+          subjectId: subjectId,
         );
 
     if (!mounted) return;
@@ -252,11 +264,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.check_circle_rounded,
-              color: const Color(0xff00CFBB),
-              size: 64,
-            ),
+            Icon(Icons.check_circle_rounded, color: const Color(0xff00CFBB), size: 64),
             const SizedBox(height: 16),
             Text(
               'Clase creada con éxito',
@@ -269,9 +277,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
             Text(
               'Comparte este código con tus alumnos para que se unan:',
               textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             Container(
@@ -298,9 +304,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
               onPressed: () => Navigator.of(ctx).pop(),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.secondary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
               child: Text(
@@ -328,11 +332,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              color: colorScheme.error,
-              size: 64,
-            ),
+            Icon(Icons.error_outline_rounded, color: colorScheme.error, size: 64),
             const SizedBox(height: 16),
             Text(
               'Error al crear la clase',
@@ -345,9 +345,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -357,9 +355,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
               onPressed: () => Navigator.of(ctx).pop(),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.secondary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
               child: Text(

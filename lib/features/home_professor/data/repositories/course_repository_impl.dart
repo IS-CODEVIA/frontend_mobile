@@ -18,11 +18,13 @@ class CourseRepositoryImpl implements CourseRepository {
     required String courseName,
     required String section,
     required String period,
+    required int subjectId,
   }) async {
     final model = await remoteDataSource.createCourse(
       courseName: courseName,
       section: section,
       period: period,
+      subjectId: subjectId,
     );
     return model.toEntity();
   }

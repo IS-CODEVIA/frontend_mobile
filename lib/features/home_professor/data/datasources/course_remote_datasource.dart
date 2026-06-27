@@ -65,6 +65,7 @@ class CourseRemoteDataSource {
     required String courseName,
     required String section,
     required String period,
+    required int subjectId,
   }) async {
     const query = '''
       mutation(\$input: CreateCourseInput!) {
@@ -77,6 +78,7 @@ class CourseRemoteDataSource {
           subjectID
           teacherID
           createdAt
+          updatedAt
         }
       }
     ''';
@@ -88,6 +90,7 @@ class CourseRemoteDataSource {
           'courseName': courseName,
           'section': section,
           'period': period,
+          'subjectID': subjectId,
         },
       },
       requiresAuth: true,

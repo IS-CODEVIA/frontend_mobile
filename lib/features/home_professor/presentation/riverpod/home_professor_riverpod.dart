@@ -41,12 +41,14 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
     required String courseName,
     required String section,
     required String period,
+    required int subjectId,
   }) async {
     try {
       final course = await ref.read(_createCourseUsecaseProvider)(
         courseName: courseName,
         section: section,
         period: period,
+        subjectId: subjectId,
       );
       state = [...state, course];
       return course;
