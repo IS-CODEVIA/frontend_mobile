@@ -10,8 +10,13 @@ import '../../../../features/material_students/presentation/widgets/unit_materia
 
 class ArchivedMaterialStudentsPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const ArchivedMaterialStudentsPage({super.key, required this.subjectName});
+  const ArchivedMaterialStudentsPage({
+    super.key,
+    required this.subjectName,
+    this.courseId = 0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,7 +46,11 @@ class ArchivedMaterialStudentsPage extends ConsumerWidget {
                   ),
                 ),
                 
-                ...unitsData.map((unit) => UnitMaterialSection(unitModel: unit, subjectName: subjectName)),
+                ...unitsData.map((unit) => UnitMaterialSection(
+                  unitModel: unit,
+                  subjectName: subjectName,
+                  courseId: courseId,
+                )),
                 
                 const SizedBox(height: 40),
               ],

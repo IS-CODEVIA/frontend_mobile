@@ -12,8 +12,14 @@ import '../widgets/content_recommendation_section.dart';
 class MaterialDetailPage extends ConsumerWidget {
   final MaterialItemModel material;
   final String subjectName;
+  final int courseId;
 
-  const MaterialDetailPage({super.key, required this.material, required this.subjectName});
+  const MaterialDetailPage({
+    super.key,
+    required this.material,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +29,10 @@ class MaterialDetailPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarStudents(), 
-      bottomNavigationBar: SubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: SubjectBottomNav(
+        subjectName: subjectName,
+        courseId: courseId,
+      ),
 
       body: Column(
         children: [

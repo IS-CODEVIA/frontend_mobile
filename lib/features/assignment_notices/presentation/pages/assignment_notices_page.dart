@@ -11,8 +11,13 @@ import '../widgets/new_notice_dialog.dart';
 
 class AssignmentNoticesPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const AssignmentNoticesPage({super.key, required this.subjectName});
+  const AssignmentNoticesPage({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +28,10 @@ class AssignmentNoticesPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarStudents(),
-      bottomNavigationBar: SubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: SubjectBottomNav(
+        subjectName: subjectName,
+        courseId: courseId,
+      ),
       body: Column(
         children: [
           const HeaderStudents(),

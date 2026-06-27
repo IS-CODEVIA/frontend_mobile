@@ -66,7 +66,11 @@ final appRouter = GoRouter(
       name: 'assignment-notices',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return AssignmentNoticesPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return AssignmentNoticesPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -74,7 +78,11 @@ final appRouter = GoRouter(
       name: 'material-students',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return MaterialStudentsPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return MaterialStudentsPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -82,7 +90,11 @@ final appRouter = GoRouter(
       name: 'transcriptor',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return TranscriptorStudentPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return TranscriptorStudentPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -90,7 +102,11 @@ final appRouter = GoRouter(
       name: 'people-student',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return PeopleStudentPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return PeopleStudentPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(

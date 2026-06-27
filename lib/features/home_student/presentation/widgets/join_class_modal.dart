@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class JoinClassModal extends StatefulWidget {
+import '../riverpod/home_students_riverpod.dart';
+
+class JoinClassModal extends ConsumerStatefulWidget {
   const JoinClassModal({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -12,10 +15,10 @@ class JoinClassModal extends StatefulWidget {
   }
 
   @override
-  State<JoinClassModal> createState() => _JoinClassModalState();
+  ConsumerState<JoinClassModal> createState() => _JoinClassModalState();
 }
 
-class _JoinClassModalState extends State<JoinClassModal> {
+class _JoinClassModalState extends ConsumerState<JoinClassModal> {
   final _codeController = TextEditingController();
 
   @override
@@ -24,10 +27,31 @@ class _JoinClassModalState extends State<JoinClassModal> {
     super.dispose();
   }
 
+  Future<void> _handleJoin() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
+
+    final notifier = ref.read(homeStudentProvider.notifier);
+    final result = await notifier.joinCourse(code);
+
+    if (!mounted) return;
+
+    if (result != null) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Te has unido a la clase exitosamente'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final state = ref.watch(homeStudentProvider);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -105,12 +129,21 @@ class _JoinClassModalState extends State<JoinClassModal> {
                 ),
               ],
             ),
+            if (state.joinError != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                state.joinError!,
+                style: textTheme.bodySmall?.copyWith(color: colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+            ],
             const SizedBox(height: 28),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed:
+                      state.isJoining ? null : () => Navigator.of(context).pop(),
                   child: Text(
                     'Cancelar',
                     style: textTheme.labelLarge?.copyWith(
@@ -120,9 +153,7 @@ class _JoinClassModalState extends State<JoinClassModal> {
                 ),
                 const SizedBox(width: 12),
                 FilledButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: state.isJoining ? null : _handleJoin,
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.secondary,
                     foregroundColor: colorScheme.onSecondary,
@@ -134,12 +165,18 @@ class _JoinClassModalState extends State<JoinClassModal> {
                       vertical: 12,
                     ),
                   ),
-                  child: Text(
-                    'Unirse',
-                    style: textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: state.isJoining
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          'Unirse',
+                          style: textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ],
             ),

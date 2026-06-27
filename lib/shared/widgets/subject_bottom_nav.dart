@@ -3,8 +3,13 @@ import 'package:go_router/go_router.dart';
 
 class SubjectBottomNav extends StatelessWidget {
   final String subjectName;
+  final int courseId;
 
-  const SubjectBottomNav({super.key, required this.subjectName});
+  const SubjectBottomNav({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,18 +42,21 @@ class SubjectBottomNav extends StatelessWidget {
                         context.goNamed(
                           'assignment-notices',
                           pathParameters: {'subjectName': subjectName},
+                          extra: {'courseId': courseId},
                         );
                       }),
                       _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {
                         context.goNamed(
                           'transcriptor',
                           pathParameters: {'subjectName': subjectName},
+                          extra: {'courseId': courseId},
                         );
                       }),
                       _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {
                         context.goNamed(
                           'material-students',
                           pathParameters: {'subjectName': subjectName},
+                          extra: {'courseId': courseId},
                         );
                       }),
                     ],
@@ -71,6 +79,7 @@ class SubjectBottomNav extends StatelessWidget {
                       context.goNamed(
                         'people-student',
                         pathParameters: {'subjectName': subjectName},
+                        extra: {'courseId': courseId},
                       );
                     },
                   ),

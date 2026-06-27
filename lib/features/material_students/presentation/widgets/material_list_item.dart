@@ -5,8 +5,14 @@ import '../pages/material_detail_page.dart';
 class MaterialListItem extends StatefulWidget {
   final MaterialItemModel item;
   final String subjectName;
+  final int courseId;
 
-  const MaterialListItem({super.key, required this.item, required this.subjectName});
+  const MaterialListItem({
+    super.key,
+    required this.item,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   State<MaterialListItem> createState() => _MaterialListItemState();
@@ -148,6 +154,7 @@ class _MaterialListItemState extends State<MaterialListItem>
                               builder: (_) => MaterialDetailPage(
                                 material: widget.item,
                                 subjectName: widget.subjectName,
+                                courseId: widget.courseId,
                               ),
                             ),
                           );

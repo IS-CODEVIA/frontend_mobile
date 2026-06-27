@@ -36,7 +36,8 @@ class _MaterialProfessorPageState
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final materials = ref.watch(materialsProfessorProvider);
+    final materials =
+        ref.watch(materialsForSubjectProvider(widget.subjectName));
 
     return Scaffold(
       drawer: const NavbarProfessors(),

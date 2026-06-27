@@ -35,7 +35,7 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
+      height: MediaQuery.of(context).size.height * 0.65,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -278,15 +278,16 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
 
     setState(() => _isLoading = true);
 
-    final result = await ref.read(materialsProfessorProvider.notifier).createMaterial(
-          subjectName: widget.subjectName,
-          title: _titleController.text.trim(),
-          fileUrl: _fileUrlController.text.trim(),
-          description: _descController.text.trim().isEmpty
-              ? null
-              : _descController.text.trim(),
-          fileType: _selectedFileType,
-        );
+    final result =
+        await ref.read(materialsProfessorProvider.notifier).createMaterial(
+              subjectName: widget.subjectName,
+              title: _titleController.text.trim(),
+              fileUrl: _fileUrlController.text.trim(),
+              description: _descController.text.trim().isEmpty
+                  ? null
+                  : _descController.text.trim(),
+              fileType: _selectedFileType,
+            );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
@@ -295,7 +296,8 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
       Navigator.of(context).pop();
       _showSuccessDialog(context, result.title);
     } else {
-      _showErrorDialog(context, 'No se pudo subir el material. Inténtalo de nuevo.');
+      _showErrorDialog(
+          context, 'No se pudo subir el material. Inténtalo de nuevo.');
     }
   }
 

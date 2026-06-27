@@ -10,8 +10,13 @@ import '../widgets/unit_material_section.dart';
 
 class MaterialStudentsPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const MaterialStudentsPage({super.key, required this.subjectName});
+  const MaterialStudentsPage({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,7 +27,10 @@ class MaterialStudentsPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarStudents(), 
-      bottomNavigationBar: SubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: SubjectBottomNav(
+        subjectName: subjectName,
+        courseId: courseId,
+      ),
       body: Column(
         children: [
           const HeaderStudents(),
@@ -41,7 +49,11 @@ class MaterialStudentsPage extends ConsumerWidget {
                   ),
                 ),
                 
-                ...unitsData.map((unit) => UnitMaterialSection(unitModel: unit, subjectName: subjectName)),
+                ...unitsData.map((unit) => UnitMaterialSection(
+                  unitModel: unit,
+                  subjectName: subjectName,
+                  courseId: courseId,
+                )),
                 
                 const SizedBox(height: 40),
               ],

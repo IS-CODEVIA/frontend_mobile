@@ -11,8 +11,13 @@ import '../widgets/role_section.dart';
 
 class PeopleStudentPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const PeopleStudentPage({super.key, required this.subjectName});
+  const PeopleStudentPage({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,7 +31,10 @@ class PeopleStudentPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarStudents(),
-      bottomNavigationBar: SubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: SubjectBottomNav(
+        subjectName: subjectName,
+        courseId: courseId,
+      ),
 
       body: Column(
         children: [

@@ -19,6 +19,7 @@ class SubjectCard extends StatelessWidget {
       onTap: () => context.goNamed(
         'assignment-notices',
         pathParameters: {'subjectName': subject.title},
+        extra: {'courseId': subject.courseId},
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16.0),
@@ -78,14 +79,6 @@ class SubjectCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            Text(
-              subject.teacherName,
-              textAlign: TextAlign.right,
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ],
         ),
       ),
