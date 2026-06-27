@@ -19,10 +19,10 @@ class ArchivedPeopleProfessorPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final allPeople = ref.watch(professorPeopleProvider);
+    final state = ref.watch(professorPeopleForCourseProvider(0));
 
-    final teachers = allPeople.where((p) => p.role == ClassRole.teacher).toList();
-    final students = allPeople.where((p) => p.role == ClassRole.student).toList();
+    final teachers = state.people.where((p) => p.role == ClassRole.teacher).toList();
+    final students = state.people.where((p) => p.role == ClassRole.student).toList();
 
     return Scaffold(
       drawer: const NavbarProfessors(),

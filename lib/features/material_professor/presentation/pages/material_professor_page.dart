@@ -11,8 +11,13 @@ import '../widgets/material_card.dart';
 
 class MaterialProfessorPage extends ConsumerStatefulWidget {
   final String subjectName;
+  final int courseId;
 
-  const MaterialProfessorPage({super.key, required this.subjectName});
+  const MaterialProfessorPage({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   ConsumerState<MaterialProfessorPage> createState() =>
@@ -27,7 +32,7 @@ class _MaterialProfessorPageState
     Future.microtask(() {
       ref
           .read(materialsProfessorProvider.notifier)
-          .loadMaterials(widget.subjectName);
+          .loadMaterials(widget.courseId);
     });
   }
 
@@ -37,20 +42,24 @@ class _MaterialProfessorPageState
     final textTheme = Theme.of(context).textTheme;
 
     final materials =
-        ref.watch(materialsForSubjectProvider(widget.subjectName));
+        ref.watch(materialsByCourseIdProvider(widget.courseId));
 
     return Scaffold(
       drawer: const NavbarProfessors(),
-      bottomNavigationBar:
-          ProfessorSubjectBottomNav(subjectName: widget.subjectName),
+      bottomNavigationBar: ProfessorSubjectBottomNav(
+        subjectName: widget.subjectName,
+        courseId: widget.courseId,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
-            builder: (_) =>
-                CreateMaterialSheet(subjectName: widget.subjectName),
+            builder: (_) => CreateMaterialSheet(
+              subjectName: widget.subjectName,
+              courseId: widget.courseId,
+            ),
           );
         },
         backgroundColor: colorScheme.secondary,
@@ -118,6 +127,7 @@ class _MaterialProfessorPageState
                               return MaterialCard(
                                 material: materials[index],
                                 subjectName: widget.subjectName,
+                                courseId: widget.courseId,
                               );
                             },
                           ),

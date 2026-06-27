@@ -10,8 +10,13 @@ import '../widgets/chat_sheet.dart';
 
 class TranscriptorProfessorPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const TranscriptorProfessorPage({super.key, required this.subjectName});
+  const TranscriptorProfessorPage({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,7 +25,10 @@ class TranscriptorProfessorPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarProfessors(),
-      bottomNavigationBar: ProfessorSubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: ProfessorSubjectBottomNav(
+        subjectName: subjectName,
+        courseId: courseId,
+      ),
       body: Column(
         children: [
           const HeaderProfessors(),

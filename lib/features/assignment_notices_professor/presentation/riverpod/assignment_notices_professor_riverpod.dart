@@ -1,64 +1,68 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AssignmentNoticesProfessorModel {
-  final String id;
-  final String authorName;
-  final String date;
-  final String message;
-  final String? authorAvatarUrl;
+import '../../../../core/di/app_container.dart';
+import '../../di/assignment_notices_professor_di.dart';
+import '../../domain/entities/notice_entity.dart';
+import '../../domain/usecases/create_notice_usecase.dart';
+import '../../domain/usecases/get_notices_usecase.dart';
 
-  const AssignmentNoticesProfessorModel({
-    required this.id,
-    required this.authorName,
-    required this.date,
-    required this.message,
-    this.authorAvatarUrl,
-  });
-}
+final _diProvider = Provider<AssignmentNoticesProfessorDI>((ref) {
+  return AssignmentNoticesProfessorDI(ref.watch(appContainerProvider)!);
+});
 
-class AssignmentNoticesProfessorNotifier extends Notifier<Map<String, List<AssignmentNoticesProfessorModel>>> {
-  @override
-  Map<String, List<AssignmentNoticesProfessorModel>> build() => {
-        'Mineria de datos': [
-          AssignmentNoticesProfessorModel(
-            id: '1',
-            authorName: 'Horacio Solis',
-            date: '10 jun 2026',
-            message: 'Mineria de datos: Mañana no habra sesion',
-          ),
-          AssignmentNoticesProfessorModel(
-            id: '2',
-            authorName: 'Horacio Solis',
-            date: '12 jun 2026',
-            message: 'La siguiente practica sera en equipo de 3 personas',
-          ),
-        ],
-        'Programacion web': [
-          AssignmentNoticesProfessorModel(
-            id: '3',
-            authorName: 'Jose Alonso Macias',
-            date: '11 jun 2026',
-            message: 'Programacion web: Revisar el capitulo 5 para la siguiente clase',
-          ),
-        ],
-      };
-
-  void addNotice(String subjectName, AssignmentNoticesProfessorModel notice) {
-    final current = state[subjectName] ?? [];
-    state = {
-      ...state,
-      subjectName: [...current, notice],
-    };
-  }
-}
-
-final assignmentNoticesProfessorProvider =
-    NotifierProvider<AssignmentNoticesProfessorNotifier, Map<String, List<AssignmentNoticesProfessorModel>>>(
-  AssignmentNoticesProfessorNotifier.new,
+final _getNoticesUsecaseProvider = Provider<GetNoticesUsecase>(
+  (ref) => ref.watch(_diProvider).getNoticesUsecase,
 );
 
-final assignmentNoticesProfessorForSubjectProvider =
-    Provider.family<List<AssignmentNoticesProfessorModel>, String>((ref, subjectName) {
-  final all = ref.watch(assignmentNoticesProfessorProvider);
-  return all[subjectName] ?? [];
+final _createNoticeUsecaseProvider = Provider<CreateNoticeUsecase>(
+  (ref) => ref.watch(_diProvider).createNoticeUsecase,
+);
+
+final professorNoticesProvider =
+    NotifierProvider<ProfessorNoticesNotifier, Map<int, List<NoticeEntity>>>(
+  ProfessorNoticesNotifier.new,
+);
+
+final professorNoticesForCourseProvider =
+    Provider.family<List<NoticeEntity>, int>((ref, courseId) {
+  final all = ref.watch(professorNoticesProvider);
+  return all[courseId] ?? [];
 });
+
+class ProfessorNoticesNotifier
+    extends Notifier<Map<int, List<NoticeEntity>>> {
+  @override
+  Map<int, List<NoticeEntity>> build() => {};
+
+  Future<void> loadNotices(int courseId) async {
+    try {
+      final notices = await ref.read(_getNoticesUsecaseProvider)(
+        courseId: courseId,
+      );
+      state = {...state, courseId: notices};
+    } catch (e, st) {
+      debugPrint('loadNotices error: $e\n$st');
+    }
+  }
+
+  Future<NoticeEntity?> createNotice({
+    required int courseId,
+    required String title,
+    String? description,
+  }) async {
+    try {
+      final notice = await ref.read(_createNoticeUsecaseProvider)(
+        courseId: courseId,
+        title: title,
+        description: description,
+      );
+      final current = state[courseId] ?? [];
+      state = {...state, courseId: [...current, notice]};
+      return notice;
+    } catch (e, st) {
+      debugPrint('createNotice error: $e\n$st');
+      return null;
+    }
+  }
+}

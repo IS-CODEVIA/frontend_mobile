@@ -18,7 +18,7 @@ class ArchivedAssignmentNoticesProfessorPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final notices = ref.watch(assignmentNoticesProfessorForSubjectProvider(subjectName));
+    final notices = ref.watch(professorNoticesForCourseProvider(0));
 
     return Scaffold(
       drawer: const NavbarProfessors(),

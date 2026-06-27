@@ -9,11 +9,13 @@ import '../../domain/entities/material_entity.dart';
 class MaterialDetailPage extends ConsumerWidget {
   final MaterialEntity material;
   final String subjectName;
+  final int courseId;
 
   const MaterialDetailPage({
     super.key,
     required this.material,
     required this.subjectName,
+    required this.courseId,
   });
 
   IconData _fileIcon(String fileType) {
@@ -40,7 +42,10 @@ class MaterialDetailPage extends ConsumerWidget {
     return Scaffold(
       drawer: const NavbarProfessors(),
       bottomNavigationBar:
-          ProfessorSubjectBottomNav(subjectName: subjectName),
+          ProfessorSubjectBottomNav(
+            subjectName: subjectName,
+            courseId: courseId,
+          ),
       body: Column(
         children: [
           const HeaderProfessors(),

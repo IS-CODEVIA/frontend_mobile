@@ -25,6 +25,7 @@ class MaterialRemoteDataSource {
     final data = await apiClient.request(
       query: query,
       variables: {'courseID': courseId},
+      requiresAuth: true,
     );
 
     final list = data['materials'] as List;

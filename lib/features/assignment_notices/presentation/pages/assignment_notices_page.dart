@@ -7,9 +7,8 @@ import '../../../../shared/widgets/subject_bottom_nav.dart';
 
 import '../riverpod/assignment_notices_riverpod.dart';
 import '../widgets/assignment_notice_card.dart';
-import '../widgets/new_notice_dialog.dart';
 
-class AssignmentNoticesPage extends ConsumerWidget {
+class AssignmentNoticesPage extends ConsumerStatefulWidget {
   final String subjectName;
   final int courseId;
 
@@ -20,17 +19,35 @@ class AssignmentNoticesPage extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AssignmentNoticesPage> createState() =>
+      _AssignmentNoticesPageState();
+}
+
+class _AssignmentNoticesPageState
+    extends ConsumerState<AssignmentNoticesPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref
+          .read(studentNoticesProvider.notifier)
+          .loadNotices(widget.courseId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final notices = ref.watch(assignmentNoticesForSubjectProvider(subjectName));
+    final notices =
+        ref.watch(studentNoticesForCourseProvider(widget.courseId));
 
     return Scaffold(
       drawer: const NavbarStudents(),
       bottomNavigationBar: SubjectBottomNav(
-        subjectName: subjectName,
-        courseId: courseId,
+        subjectName: widget.subjectName,
+        courseId: widget.courseId,
       ),
       body: Column(
         children: [
@@ -43,7 +60,7 @@ class AssignmentNoticesPage extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    subjectName,
+                    widget.subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
@@ -67,32 +84,35 @@ class AssignmentNoticesPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => NewNoticeDialog.show(context, ref, subjectName),
-                      icon: const Icon(Icons.add_rounded, size: 20),
-                      label: const Text('Nuevo anuncio'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xff00CFBB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(top: 8, bottom: 24),
-                      itemCount: notices.length,
-                      itemBuilder: (context, index) {
-                        return AssignmentNoticeCard(notice: notices[index]);
-                      },
-                    ),
+                    child: notices.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.notifications_off_outlined,
+                                    size: 48,
+                                    color: colorScheme.onSurfaceVariant),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No hay avisos',
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding:
+                                const EdgeInsets.only(top: 8, bottom: 24),
+                            itemCount: notices.length,
+                            itemBuilder: (context, index) {
+                              return AssignmentNoticeCard(
+                                  notice: notices[index]);
+                            },
+                          ),
                   ),
                 ],
               ),

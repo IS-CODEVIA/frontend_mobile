@@ -5,8 +5,13 @@ import '../riverpod/material_professor_riverpod.dart';
 
 class CreateMaterialSheet extends ConsumerStatefulWidget {
   final String subjectName;
+  final int courseId;
 
-  const CreateMaterialSheet({super.key, required this.subjectName});
+  const CreateMaterialSheet({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   ConsumerState<CreateMaterialSheet> createState() =>
@@ -280,7 +285,7 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
 
     final result =
         await ref.read(materialsProfessorProvider.notifier).createMaterial(
-              subjectName: widget.subjectName,
+              courseId: widget.courseId,
               title: _titleController.text.trim(),
               fileUrl: _fileUrlController.text.trim(),
               description: _descController.text.trim().isEmpty

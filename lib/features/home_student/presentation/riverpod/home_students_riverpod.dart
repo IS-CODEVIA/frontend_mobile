@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
@@ -80,7 +81,8 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
           )
           .toList();
       state = state.copyWith(isLoading: false, subjects: subjects);
-    } on Exception catch (e) {
+    } catch (e, st) {
+      debugPrint('loadEnrollments error: $e\n$st');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -95,7 +97,8 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
       state = state.copyWith(isJoining: false, joinResult: result);
       loadEnrollments();
       return result;
-    } on Exception catch (e) {
+    } catch (e, st) {
+      debugPrint('joinCourse error: $e\n$st');
       state = state.copyWith(isJoining: false, joinError: e.toString());
       return null;
     }

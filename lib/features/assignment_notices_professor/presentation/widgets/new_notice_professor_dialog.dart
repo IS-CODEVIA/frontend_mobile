@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../riverpod/assignment_notices_professor_riverpod.dart';
 
 class NewNoticeProfessorDialog {
-  static void show(BuildContext context, WidgetRef ref, String subjectName) {
+  static void show(
+    BuildContext context,
+    WidgetRef ref,
+    int courseId,
+  ) {
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -24,18 +28,15 @@ class NewNoticeProfessorDialog {
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               if (controller.text.trim().isNotEmpty) {
-                ref.read(assignmentNoticesProfessorProvider.notifier).addNotice(
-                  subjectName,
-                  AssignmentNoticesProfessorModel(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    authorName: 'Tu',
-                    date: 'Hoy',
-                    message: controller.text.trim(),
-                  ),
-                );
-                Navigator.pop(ctx);
+                await ref
+                    .read(professorNoticesProvider.notifier)
+                    .createNotice(
+                      courseId: courseId,
+                      title: controller.text.trim(),
+                    );
+                if (ctx.mounted) Navigator.pop(ctx);
               }
             },
             child: const Text('Publicar'),

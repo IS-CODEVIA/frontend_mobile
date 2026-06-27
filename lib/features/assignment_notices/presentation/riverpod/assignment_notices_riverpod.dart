@@ -1,49 +1,43 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/models/assignment_notice_model.dart';
 
-class AssignmentNoticesNotifier extends Notifier<Map<String, List<AssignmentNoticeModel>>> {
-  @override
-  Map<String, List<AssignmentNoticeModel>> build() => {
-        'Mineria de datos': [
-          AssignmentNoticeModel(
-            id: '1',
-            authorName: 'Horacio Solis',
-            date: '10 jun 2026',
-            message: 'Mineria de datos: Mañana no habra sesion',
-          ),
-          AssignmentNoticeModel(
-            id: '2',
-            authorName: 'Horacio Solis',
-            date: '12 jun 2026',
-            message: 'La siguiente practica sera en equipo de 3 personas',
-          ),
-        ],
-        'Programacion web': [
-          AssignmentNoticeModel(
-            id: '3',
-            authorName: 'Jose Alonso Macias',
-            date: '11 jun 2026',
-            message: 'Programacion web: Revisar el capitulo 5 para la siguiente clase',
-          ),
-        ],
-      };
+import '../../../../core/di/app_container.dart';
+import '../../di/assignment_notices_di.dart';
+import '../../domain/entities/notice_entity.dart';
+import '../../domain/usecases/get_notices_usecase.dart';
 
-  void addNotice(String subjectName, AssignmentNoticeModel notice) {
-    final current = state[subjectName] ?? [];
-    state = {
-      ...state,
-      subjectName: [...current, notice],
-    };
-  }
-}
+final _diProvider = Provider<AssignmentNoticesDI>((ref) {
+  return AssignmentNoticesDI(ref.watch(appContainerProvider)!);
+});
 
-final assignmentNoticesProvider =
-    NotifierProvider<AssignmentNoticesNotifier, Map<String, List<AssignmentNoticeModel>>>(
-  AssignmentNoticesNotifier.new,
+final _getNoticesUsecaseProvider = Provider<GetNoticesUsecase>(
+  (ref) => ref.watch(_diProvider).getNoticesUsecase,
 );
 
-final assignmentNoticesForSubjectProvider =
-    Provider.family<List<AssignmentNoticeModel>, String>((ref, subjectName) {
-  final all = ref.watch(assignmentNoticesProvider);
-  return all[subjectName] ?? [];
+final studentNoticesProvider =
+    NotifierProvider<StudentNoticesNotifier, Map<int, List<NoticeEntity>>>(
+  StudentNoticesNotifier.new,
+);
+
+final studentNoticesForCourseProvider =
+    Provider.family<List<NoticeEntity>, int>((ref, courseId) {
+  final all = ref.watch(studentNoticesProvider);
+  return all[courseId] ?? [];
 });
+
+class StudentNoticesNotifier
+    extends Notifier<Map<int, List<NoticeEntity>>> {
+  @override
+  Map<int, List<NoticeEntity>> build() => {};
+
+  Future<void> loadNotices(int courseId) async {
+    try {
+      final notices = await ref.read(_getNoticesUsecaseProvider)(
+        courseId: courseId,
+      );
+      state = {...state, courseId: notices};
+    } catch (e, st) {
+      debugPrint('loadNotices error: $e\n$st');
+    }
+  }
+}

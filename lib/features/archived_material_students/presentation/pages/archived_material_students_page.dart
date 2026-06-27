@@ -5,8 +5,8 @@ import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/archived_subject_bottom_nav.dart';
 
-import '../../../../features/material_students/presentation/riverpod/materials_riverpod.dart';
 import '../../../../features/material_students/presentation/widgets/unit_material_section.dart';
+import '../../../../features/material_students/domain/models/material_model.dart';
 
 class ArchivedMaterialStudentsPage extends ConsumerWidget {
   final String subjectName;
@@ -23,7 +23,7 @@ class ArchivedMaterialStudentsPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final unitsData = ref.watch(materialsProvider);
+    final unitsData = <UnitMaterialsModel>[];
 
     return Scaffold(
       drawer: const NavbarStudents(), 

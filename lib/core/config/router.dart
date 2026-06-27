@@ -163,6 +163,7 @@ final appRouter = GoRouter(
         final extra = state.extra as Map<String, dynamic>?;
         return AssignmentNoticesProfessorPage(
           subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
           joinCode: extra?['joinCode'] as String?,
         );
       },
@@ -172,7 +173,11 @@ final appRouter = GoRouter(
       name: 'professor-material-students',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return MaterialProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return MaterialProfessorPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -180,7 +185,11 @@ final appRouter = GoRouter(
       name: 'professor-transcriptor',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return TranscriptorProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return TranscriptorProfessorPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -188,7 +197,11 @@ final appRouter = GoRouter(
       name: 'professor-people-student',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return PeopleProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return PeopleProfessorPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     // Professor archived routes
@@ -206,6 +219,7 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
         return ArchivedMaterialProfessorPage(subjectName: subjectName);
+
       },
     ),
     GoRoute(

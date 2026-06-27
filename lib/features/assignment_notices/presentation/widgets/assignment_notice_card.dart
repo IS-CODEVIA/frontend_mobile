@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/assignment_notice_model.dart';
+import '../../domain/entities/notice_entity.dart';
 
 class AssignmentNoticeCard extends StatelessWidget {
-  final AssignmentNoticeModel notice;
+  final NoticeEntity notice;
 
   const AssignmentNoticeCard({super.key, required this.notice});
 
@@ -37,14 +37,14 @@ class AssignmentNoticeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    notice.authorName,
+                    notice.title,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Text(
-                    notice.date,
+                    notice.createdAt,
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.w600,
@@ -54,14 +54,16 @@ class AssignmentNoticeCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            notice.message,
-            style: textTheme.bodyLarge?.copyWith(
-              color: colorScheme.secondary,
-              fontWeight: FontWeight.w600,
+          if (notice.description != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              notice.description!,
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.secondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

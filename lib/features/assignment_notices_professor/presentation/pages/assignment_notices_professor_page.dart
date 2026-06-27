@@ -9,26 +9,49 @@ import '../riverpod/assignment_notices_professor_riverpod.dart';
 import '../widgets/assignment_notice_professor_card.dart';
 import '../widgets/new_notice_professor_dialog.dart';
 
-class AssignmentNoticesProfessorPage extends ConsumerWidget {
+class AssignmentNoticesProfessorPage extends ConsumerStatefulWidget {
   final String subjectName;
+  final int courseId;
   final String? joinCode;
 
   const AssignmentNoticesProfessorPage({
     super.key,
     required this.subjectName,
+    required this.courseId,
     this.joinCode,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AssignmentNoticesProfessorPage> createState() =>
+      _AssignmentNoticesProfessorPageState();
+}
+
+class _AssignmentNoticesProfessorPageState
+    extends ConsumerState<AssignmentNoticesProfessorPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref
+          .read(professorNoticesProvider.notifier)
+          .loadNotices(widget.courseId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final notices = ref.watch(assignmentNoticesProfessorForSubjectProvider(subjectName));
+    final notices =
+        ref.watch(professorNoticesForCourseProvider(widget.courseId));
 
     return Scaffold(
       drawer: const NavbarProfessors(),
-      bottomNavigationBar: ProfessorSubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: ProfessorSubjectBottomNav(
+        subjectName: widget.subjectName,
+        courseId: widget.courseId,
+      ),
       body: Column(
         children: [
           const HeaderProfessors(),
@@ -40,20 +63,23 @@ class AssignmentNoticesProfessorPage extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    subjectName,
+                    widget.subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (joinCode != null && joinCode!.isNotEmpty) ...[
+                  if (widget.joinCode != null &&
+                      widget.joinCode!.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: colorScheme.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: colorScheme.outlineVariant),
+                        border:
+                            Border.all(color: colorScheme.outlineVariant),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -71,22 +97,11 @@ class AssignmentNoticesProfessorPage extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            joinCode!,
+                            widget.joinCode!,
                             style: textTheme.titleMedium?.copyWith(
                               color: colorScheme.secondary,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () {
-                              // TODO: copy to clipboard
-                            },
-                            child: Icon(
-                              Icons.copy_rounded,
-                              size: 16,
-                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -115,7 +130,11 @@ class AssignmentNoticesProfessorPage extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () => NewNoticeProfessorDialog.show(context, ref, subjectName),
+                      onPressed: () => NewNoticeProfessorDialog.show(
+                        context,
+                        ref,
+                        widget.courseId,
+                      ),
                       icon: const Icon(Icons.add_rounded, size: 20),
                       label: const Text('Nuevo anuncio'),
                       style: ElevatedButton.styleFrom(
@@ -134,7 +153,8 @@ class AssignmentNoticesProfessorPage extends ConsumerWidget {
                       padding: const EdgeInsets.only(top: 8, bottom: 24),
                       itemCount: notices.length,
                       itemBuilder: (context, index) {
-                        return AssignmentNoticeProfessorCard(notice: notices[index]);
+                        return AssignmentNoticeProfessorCard(
+                            notice: notices[index]);
                       },
                     ),
                   ),

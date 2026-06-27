@@ -5,11 +5,13 @@ import '../pages/material_detail_page.dart';
 class MaterialCard extends StatelessWidget {
   final MaterialEntity material;
   final String subjectName;
+  final int courseId;
 
   const MaterialCard({
     super.key,
     required this.material,
     required this.subjectName,
+    required this.courseId,
   });
 
   IconData _fileIcon(String fileType) {
@@ -130,6 +132,7 @@ class MaterialCard extends StatelessWidget {
                   builder: (_) => MaterialDetailPage(
                     material: material,
                     subjectName: subjectName,
+                    courseId: courseId,
                   ),
                 ),
               );

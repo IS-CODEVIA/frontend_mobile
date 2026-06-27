@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
@@ -34,7 +35,9 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
     try {
       final courses = await ref.read(_getCoursesUsecaseProvider)();
       state = courses;
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('_loadCourses error: $e\n$st');
+    }
   }
 
   Future<CourseEntity?> createCourse({
@@ -52,7 +55,8 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
       );
       state = [...state, course];
       return course;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('createCourse error: $e\n$st');
       return null;
     }
   }

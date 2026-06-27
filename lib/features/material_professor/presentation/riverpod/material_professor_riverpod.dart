@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
-import '../../../home_professor/presentation/riverpod/home_professor_riverpod.dart';
 import '../../di/material_professor_di.dart';
 import '../../domain/entities/material_entity.dart';
 import '../../domain/usecases/create_material_usecase.dart';
@@ -19,72 +18,38 @@ final _createMaterialUsecaseProvider = Provider<CreateMaterialUsecase>((ref) {
   return ref.watch(_materialProfessorDIProvider).createMaterialUsecase;
 });
 
-final materialsProfessorProvider = NotifierProvider<
-    MaterialsProfessorNotifier, Map<String, List<MaterialEntity>>>(
+final materialsProfessorProvider =
+    NotifierProvider<MaterialsProfessorNotifier, Map<int, List<MaterialEntity>>>(
   MaterialsProfessorNotifier.new,
 );
 
-final materialsForSubjectProvider =
-    Provider.family<List<MaterialEntity>, String>((ref, subjectName) {
+final materialsByCourseIdProvider =
+    Provider.family<List<MaterialEntity>, int>((ref, courseId) {
   final all = ref.watch(materialsProfessorProvider);
-  return all[subjectName] ?? [];
+  return all[courseId] ?? [];
 });
 
 class MaterialsProfessorNotifier
-    extends Notifier<Map<String, List<MaterialEntity>>> {
+    extends Notifier<Map<int, List<MaterialEntity>>> {
   @override
-  Map<String, List<MaterialEntity>> build() {
-    ref.listen(professorSubjectsProvider, (_, next) {
-      if (next.isNotEmpty) {
-        _retryPendingLoads();
-      }
-    });
-    return {};
-  }
+  Map<int, List<MaterialEntity>> build() => {};
 
-  int? _resolveCourseId(String subjectName) {
-    final courses = ref.read(professorSubjectsProvider);
-    try {
-      return courses.firstWhere((c) => c.courseName == subjectName).courseId;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  void _retryPendingLoads() {
-    for (final subjectName in state.keys) {
-      if (state[subjectName]!.isEmpty) {
-        loadMaterials(subjectName);
-      }
-    }
-  }
-
-  Future<void> loadMaterials(String subjectName) async {
-    if (!state.containsKey(subjectName)) {
-      state = {...state, subjectName: []};
-    }
-
-    final courseId = _resolveCourseId(subjectName);
-    if (courseId == null) return;
-
+  Future<void> loadMaterials(int courseId) async {
     try {
       final materials = await ref.read(_getMaterialsUsecaseProvider)(
         courseId: courseId,
       );
-      state = {...state, subjectName: materials};
+      state = {...state, courseId: materials};
     } catch (_) {}
   }
 
   Future<MaterialEntity?> createMaterial({
-    required String subjectName,
+    required int courseId,
     required String title,
     required String fileUrl,
     String? description,
     required String fileType,
   }) async {
-    final courseId = _resolveCourseId(subjectName);
-    if (courseId == null) return null;
-
     try {
       final material = await ref.read(_createMaterialUsecaseProvider)(
         courseId: courseId,
@@ -93,8 +58,8 @@ class MaterialsProfessorNotifier
         description: description,
         fileType: fileType,
       );
-      final current = state[subjectName] ?? [];
-      state = {...state, subjectName: [...current, material]};
+      final current = state[courseId] ?? [];
+      state = {...state, courseId: [...current, material]};
       return material;
     } catch (_) {
       return null;
