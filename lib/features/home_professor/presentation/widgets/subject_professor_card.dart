@@ -1,24 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/theme/theme.dart';
-import '../../domain/models/subject_professor_model.dart';
+import '../../domain/entities/course_entity.dart';
 
 class SubjectProfessorCard extends StatelessWidget {
-  final SubjectProfessorModel subject;
+  final CourseEntity course;
+  final int index;
 
-  const SubjectProfessorCard({super.key, required this.subject});
+  const SubjectProfessorCard({
+    super.key,
+    required this.course,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final bgColor = theme.subjectCardBackground(subject.colorSeed);
+    final bgColor = theme.subjectCardBackground(index % 7);
 
     return GestureDetector(
       onTap: () => context.goNamed(
         'professor-assignment-notices',
-        pathParameters: {'subjectName': subject.title},
+        pathParameters: {'subjectName': course.courseName},
+        extra: {
+          'courseId': course.courseId,
+          'joinCode': course.joinCode,
+        },
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16.0),
@@ -46,7 +55,7 @@ class SubjectProfessorCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        subject.title,
+                        course.courseName,
                         style: textTheme.titleLarge?.copyWith(
                           color: colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
@@ -54,7 +63,7 @@ class SubjectProfessorCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        subject.subtitle,
+                        course.section,
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onPrimary.withValues(alpha: 0.9),
                         ),
@@ -74,7 +83,7 @@ class SubjectProfessorCard extends StatelessWidget {
                       Icon(Icons.people, size: 16, color: colorScheme.secondary),
                       const SizedBox(width: 4),
                       Text(
-                        '${subject.enrolledStudents}',
+                        '0',
                         style: textTheme.labelLarge?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.bold,
@@ -84,15 +93,6 @@ class SubjectProfessorCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              subject.professorName,
-              textAlign: TextAlign.right,
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w600,
-              ),
             ),
           ],
         ),

@@ -11,8 +11,13 @@ import '../widgets/new_notice_professor_dialog.dart';
 
 class AssignmentNoticesProfessorPage extends ConsumerWidget {
   final String subjectName;
+  final String? joinCode;
 
-  const AssignmentNoticesProfessorPage({super.key, required this.subjectName});
+  const AssignmentNoticesProfessorPage({
+    super.key,
+    required this.subjectName,
+    this.joinCode,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,6 +46,53 @@ class AssignmentNoticesProfessorPage extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (joinCode != null && joinCode!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.key_rounded,
+                            size: 16,
+                            color: colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Código de clase: ',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            joinCode!,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () {
+                              // TODO: copy to clipboard
+                            },
+                            child: Icon(
+                              Icons.copy_rounded,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Row(
                     children: [

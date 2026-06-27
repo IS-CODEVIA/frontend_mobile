@@ -144,7 +144,11 @@ final appRouter = GoRouter(
       name: 'professor-assignment-notices',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return AssignmentNoticesProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return AssignmentNoticesProfessorPage(
+          subjectName: subjectName,
+          joinCode: extra?['joinCode'] as String?,
+        );
       },
     ),
     GoRoute(

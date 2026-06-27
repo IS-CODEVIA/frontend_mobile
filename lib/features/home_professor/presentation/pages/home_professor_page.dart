@@ -16,7 +16,7 @@ class HomeProfessorPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final subjects = ref.watch(professorSubjectsProvider);
+    final courses = ref.watch(professorSubjectsProvider);
 
     return Scaffold(
       drawer: const NavbarProfessors(),
@@ -54,7 +54,7 @@ class HomeProfessorPage extends ConsumerWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Asignaturas',
+                        'Mis asignaturas',
                         style: textTheme.headlineMedium?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class HomeProfessorPage extends ConsumerWidget {
                       ),
                       const Spacer(),
                       Text(
-                        '${subjects.length}',
+                        '${courses.length}',
                         style: textTheme.headlineMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
@@ -74,9 +74,12 @@ class HomeProfessorPage extends ConsumerWidget {
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.only(top: 8, bottom: 80),
-                      itemCount: subjects.length,
+                      itemCount: courses.length,
                       itemBuilder: (context, index) {
-                        return SubjectProfessorCard(subject: subjects[index]);
+                        return SubjectProfessorCard(
+                          course: courses[index],
+                          index: index,
+                        );
                       },
                     ),
                   ),

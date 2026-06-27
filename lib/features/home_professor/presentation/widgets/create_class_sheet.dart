@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/models/subject_professor_model.dart';
 import '../riverpod/home_professor_riverpod.dart';
 
 class CreateClassSheet extends ConsumerStatefulWidget {
@@ -12,15 +11,17 @@ class CreateClassSheet extends ConsumerStatefulWidget {
 }
 
 class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
-  final _titleController = TextEditingController();
-  final _subtitleController = TextEditingController();
-  final _professorNameController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _sectionController = TextEditingController();
+  final _periodController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _subtitleController.dispose();
-    _professorNameController.dispose();
+    _nameController.dispose();
+    _sectionController.dispose();
+    _periodController.dispose();
     super.dispose();
   }
 
@@ -30,7 +31,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
+      height: MediaQuery.of(context).size.height * 0.52,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -59,36 +60,45 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
             ),
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                _buildField(
-                  label: 'Nombre de la clase',
-                  hint: 'Ej. Programación avanzada',
-                  controller: _titleController,
-                  icon: Icons.menu_book_rounded,
-                  colorScheme: colorScheme,
-                  textTheme: textTheme,
-                ),
-                const SizedBox(height: 16),
-                _buildField(
-                  label: 'Grupo',
-                  hint: 'Ej. Ing ITi4A',
-                  controller: _subtitleController,
-                  icon: Icons.group_rounded,
-                  colorScheme: colorScheme,
-                  textTheme: textTheme,
-                ),
-                const SizedBox(height: 16),
-                _buildField(
-                  label: 'Nombre del docente',
-                  hint: 'Ej. Juan Pérez',
-                  controller: _professorNameController,
-                  icon: Icons.person_rounded,
-                  colorScheme: colorScheme,
-                  textTheme: textTheme,
-                ),
-              ],
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildField(
+                    label: 'Nombre del curso',
+                    hint: 'Ej. Programación avanzada',
+                    controller: _nameController,
+                    icon: Icons.menu_book_rounded,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Requerido' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    label: 'Grupo',
+                    hint: 'Ej. Ing ITi4A',
+                    controller: _sectionController,
+                    icon: Icons.group_rounded,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Requerido' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    label: 'Periodo',
+                    hint: 'Ej. 2025-A',
+                    controller: _periodController,
+                    icon: Icons.calendar_today_rounded,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Requerido' : null,
+                  ),
+                ],
+              ),
             ),
           ),
           Container(
@@ -101,7 +111,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: colorScheme.secondary),
                       shape: RoundedRectangleBorder(
@@ -121,7 +131,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton(
-                    onPressed: _createClass,
+                    onPressed: _isLoading ? null : _createClass,
                     style: FilledButton.styleFrom(
                       backgroundColor: colorScheme.secondary,
                       foregroundColor: colorScheme.onSecondary,
@@ -130,12 +140,21 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Text(
-                      'Crear',
-                      style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colorScheme.onSecondary,
+                            ),
+                          )
+                        : Text(
+                            'Crear',
+                            style: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -153,6 +172,7 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     required IconData icon,
     required ColorScheme colorScheme,
     required TextTheme textTheme,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,8 +191,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
           ],
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
+          validator: validator,
           style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: hint,
@@ -194,23 +215,164 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     );
   }
 
-  void _createClass() {
-    final title = _titleController.text.trim();
-    final subtitle = _subtitleController.text.trim();
-    final professorName = _professorNameController.text.trim();
+  Future<void> _createClass() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    if (title.isEmpty || subtitle.isEmpty || professorName.isEmpty) return;
+    setState(() => _isLoading = true);
 
-    final newSubject = SubjectProfessorModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: title,
-      subtitle: subtitle,
-      professorName: professorName,
-      enrolledStudents: 0,
-      colorSeed: ref.read(professorSubjectsProvider).length % 7,
+    final courseName = _nameController.text.trim();
+    final section = _sectionController.text.trim();
+    final period = _periodController.text.trim();
+
+    final result = await ref.read(professorSubjectsProvider.notifier).createCourse(
+          courseName: courseName,
+          section: section,
+          period: period,
+        );
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (result != null) {
+      Navigator.of(context).pop();
+      _showSuccessDialog(context, result.joinCode);
+    } else {
+      _showErrorDialog(context, 'No se pudo crear la clase. Inténtalo de nuevo.');
+    }
+  }
+
+  void _showSuccessDialog(BuildContext context, String joinCode) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle_rounded,
+              color: const Color(0xff00CFBB),
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Clase creada con éxito',
+              style: textTheme.titleLarge?.copyWith(
+                color: colorScheme.secondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Comparte este código con tus alumnos para que se unan:',
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colorScheme.secondary),
+              ),
+              child: Text(
+                joinCode,
+                style: textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 3,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.secondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: Text(
+                'Listo',
+                style: textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+  }
 
-    ref.read(professorSubjectsProvider.notifier).addSubject(newSubject);
-    Navigator.of(context).pop();
+  void _showErrorDialog(BuildContext context, String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              color: colorScheme.error,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Error al crear la clase',
+              style: textTheme.titleLarge?.copyWith(
+                color: colorScheme.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.secondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: Text(
+                'Cerrar',
+                style: textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
