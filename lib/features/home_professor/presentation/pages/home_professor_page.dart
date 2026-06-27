@@ -5,6 +5,7 @@ import '../../../../shared/widgets_professor/header_professors.dart';
 import '../../../../shared/widgets_professor/navbar_professors.dart';
 
 import '../riverpod/home_professor_riverpod.dart';
+import '../widgets/create_class_sheet.dart';
 import '../widgets/subject_professor_card.dart';
 
 class HomeProfessorPage extends ConsumerWidget {
@@ -19,6 +20,21 @@ class HomeProfessorPage extends ConsumerWidget {
 
     return Scaffold(
       drawer: const NavbarProfessors(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => const CreateClassSheet(),
+          );
+        },
+        backgroundColor: colorScheme.secondary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Icon(Icons.add, color: colorScheme.onSecondary, size: 32),
+      ),
       body: Column(
         children: [
           const HeaderProfessors(),

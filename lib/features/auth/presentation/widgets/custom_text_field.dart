@@ -5,6 +5,7 @@ class CustomTextField extends StatelessWidget {
   final bool isPassword;
   final TextEditingController? controller;
   final bool compact;
+  final String? Function(String?)? validator;
 
   const CustomTextField({
     super.key,
@@ -12,6 +13,7 @@ class CustomTextField extends StatelessWidget {
     this.isPassword = false,
     this.controller,
     this.compact = false,
+    this.validator,
   });
 
   @override
@@ -29,9 +31,10 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         SizedBox(height: compact ? 4 : 8),
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: isPassword,
+          validator: validator,
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16,

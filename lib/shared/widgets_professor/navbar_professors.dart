@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class NavbarProfessors extends StatelessWidget {
+import '../../features/auth/presentation/riverpod/auth_riverpod.dart';
+
+class NavbarProfessors extends ConsumerWidget {
   const NavbarProfessors({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -50,7 +53,10 @@ class NavbarProfessors extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildMenuItem('Ayuda', Icons.help_outline_rounded, itemStyle, () => _showHelpModal(context)),
                   const SizedBox(height: 16),
-                  _buildMenuItem('Cerrar sesión', Icons.logout_rounded, itemStyle, () => context.goNamed('login')),
+                  _buildMenuItem('Cerrar sesión', Icons.logout_rounded, itemStyle, () async {
+                    await ref.read(authViewModelProvider.notifier).logout();
+                    if (context.mounted) context.goNamed('login');
+                  }),
                 ],
               ),
             ),

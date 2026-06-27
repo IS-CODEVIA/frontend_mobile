@@ -1,5 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/app_container.dart';
+import '../../di/auth_di.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
+
+final _authDIProvider = Provider<AuthDI>((ref) {
+  final container = ref.watch(appContainerProvider);
+  return AuthDI(container!);
+});
+
+final _loginUsecaseProvider = Provider<LoginUsecase>((ref) {
+  return ref.watch(_authDIProvider).loginUsecase;
+});
+
+final _registerUsecaseProvider = Provider<RegisterUsecase>((ref) {
+  return ref.watch(_authDIProvider).registerUsecase;
+});
+
 enum AuthStatus {
   initial,
   unauthenticated,
@@ -13,6 +31,7 @@ class AuthState {
   final bool isStudent;
   final bool isRegisterLoading;
   final bool isRegisterSuccess;
+  final UserData? user;
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -21,6 +40,7 @@ class AuthState {
     this.isStudent = true,
     this.isRegisterLoading = false,
     this.isRegisterSuccess = false,
+    this.user,
   });
 
   AuthState copyWith({
@@ -30,6 +50,7 @@ class AuthState {
     bool? isStudent,
     bool? isRegisterLoading,
     bool? isRegisterSuccess,
+    UserData? user,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -38,8 +59,23 @@ class AuthState {
       isStudent: isStudent ?? this.isStudent,
       isRegisterLoading: isRegisterLoading ?? this.isRegisterLoading,
       isRegisterSuccess: isRegisterSuccess ?? this.isRegisterSuccess,
+      user: user ?? this.user,
     );
   }
+}
+
+class UserData {
+  final int userId;
+  final String name;
+  final String email;
+  final int roleId;
+
+  const UserData({
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.roleId,
+  });
 }
 
 class AuthNotifier extends Notifier<AuthState> {
@@ -50,24 +86,80 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isStudent: isStudent);
   }
 
-  void register() {
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final payload = await ref.read(_loginUsecaseProvider)(
+        email: email,
+        password: password,
+      );
+      final storage = ref.read(appContainerProvider)!.tokenStorage;
+      await storage.saveToken(payload.accessToken);
+      await storage.saveRefreshToken(payload.refreshToken);
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        isLoading: false,
+        user: UserData(
+          userId: payload.user.userId,
+          name: payload.user.name,
+          email: payload.user.email,
+          roleId: payload.user.roleId,
+        ),
+      );
+    } on Exception catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+    required int roleId,
+  }) async {
     state = state.copyWith(isRegisterLoading: true, error: null);
-    
+
+    try {
+      final payload = await ref.read(_registerUsecaseProvider)(
+        name: name,
+        email: email,
+        password: password,
+        roleId: roleId,
+      );
+      final storage = ref.read(appContainerProvider)!.tokenStorage;
+      await storage.saveToken(payload.accessToken);
+      await storage.saveRefreshToken(payload.refreshToken);
+      state = state.copyWith(
+        isRegisterLoading: false,
+        isRegisterSuccess: true,
+        user: UserData(
+          userId: payload.user.userId,
+          name: payload.user.name,
+          email: payload.user.email,
+          roleId: payload.user.roleId,
+        ),
+      );
+    } on Exception catch (e) {
+      state = state.copyWith(
+        isRegisterLoading: false,
+        error: e.toString(),
+      );
+    }
   }
 
   void clearRegisterSuccess() {
     state = state.copyWith(isRegisterSuccess: false);
   }
 
-  void goToLogin() {
-    state = state.copyWith(status: AuthStatus.unauthenticated, error: null);
-  }
-
-  void goToHome() {
-    state = state.copyWith(status: AuthStatus.authenticated, error: null);
-  }
-
-  void logout() {
+  Future<void> logout() async {
+    await ref.read(appContainerProvider)!.tokenStorage.clearTokens();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
