@@ -1,3 +1,5 @@
+export '../../../../core/network/transcription_service.dart' show TranscriptionConnectionState;
+
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/transcription_service.dart';

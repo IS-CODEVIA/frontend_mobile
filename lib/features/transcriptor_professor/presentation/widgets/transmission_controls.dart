@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/transcription_service.dart';
 import '../riverpod/transcription_professor_riverpod.dart';
 
 class TransmissionControls extends ConsumerStatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/network/transcription_service.dart';
+import '../riverpod/transcription_riverpod.dart';
 import '../../domain/models/transcription_message.dart';
 
 class TranscriptionBox extends StatelessWidget {

@@ -6,6 +6,7 @@ import '../riverpod/auth_riverpod.dart';
 import '../widgets/register_background.dart';
 import '../widgets/role_selector_button.dart';
 import '../widgets/custom_text_field.dart';
+import '../widgets/terms_dialog.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -20,6 +21,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  var _acceptedTerms = false;
 
   @override
   void initState() {
@@ -164,7 +166,63 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 140),
+                    const SizedBox(height: 24),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() => _acceptedTerms = !_acceptedTerms),
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: _acceptedTerms
+                                  ? colorScheme.primary
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: _acceptedTerms
+                                    ? colorScheme.primary
+                                    : colorScheme.onSecondary,
+                                width: 2,
+                              ),
+                            ),
+                            child: _acceptedTerms
+                                ? Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: colorScheme.onPrimary,
+                                  )
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _acceptedTerms = !_acceptedTerms),
+                            child: Text(
+                              'Acepto los términos y condiciones',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.secondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => showTermsDialog(context),
+                      child: Text(
+                        'Ver términos y condiciones',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -174,7 +232,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             bottom: 40,
             right: 32,
             child: OutlinedButton(
-              onPressed: authState.isRegisterLoading ? null : _register,
+              onPressed: (authState.isRegisterLoading || !_acceptedTerms) ? null : _register,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: colorScheme.onSecondary, width: 1.5),
                 shape: RoundedRectangleBorder(
@@ -230,6 +288,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   void _register() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Debes aceptar los términos y condiciones'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
 
     final name = _nameController.text.trim();
     final lastName = _lastNameController.text.trim();
