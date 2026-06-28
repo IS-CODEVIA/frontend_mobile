@@ -37,7 +37,18 @@ class ApiClient {
       body: body,
     );
 
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      final message = _tryExtractErrorMessage(response.body)
+          ?? 'Error HTTP ${response.statusCode}';
+      throw ApiException(message);
+    }
+
+    Map<String, dynamic> decoded;
+    try {
+      decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw ApiException('Respuesta inválida del servidor');
+    }
 
     if (decoded.containsKey('errors')) {
       final errors = decoded['errors'] as List;
@@ -47,7 +58,28 @@ class ApiClient {
       throw ApiException(message);
     }
 
-    return decoded['data'] as Map<String, dynamic>;
+    final data = decoded['data'];
+    if (data == null) {
+      throw ApiException('No se recibieron datos del servidor');
+    }
+
+    return data as Map<String, dynamic>;
+  }
+
+  String? _tryExtractErrorMessage(String body) {
+    try {
+      final decoded = jsonDecode(body) as Map<String, dynamic>;
+      if (decoded.containsKey('error')) {
+        return decoded['error'] as String?;
+      }
+      if (decoded.containsKey('errors')) {
+        final errors = decoded['errors'] as List?;
+        if (errors != null && errors.isNotEmpty) {
+          return errors.first['message'] as String?;
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 }
 

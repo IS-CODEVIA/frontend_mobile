@@ -30,13 +30,30 @@ class NewNoticeProfessorDialog {
           FilledButton(
             onPressed: () async {
               if (controller.text.trim().isNotEmpty) {
-                await ref
+                final result = await ref
                     .read(professorNoticesProvider.notifier)
                     .createNotice(
                       courseId: courseId,
                       title: controller.text.trim(),
                     );
-                if (ctx.mounted) Navigator.pop(ctx);
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  if (result == null && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Error al crear el anuncio'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else if (result != null && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Anuncio creado correctamente'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                }
               }
             },
             child: const Text('Publicar'),

@@ -14,30 +14,63 @@ final _getNoticesUsecaseProvider = Provider<GetNoticesUsecase>(
   (ref) => ref.watch(_diProvider).getNoticesUsecase,
 );
 
+class StudentNoticesState {
+  final bool isLoading;
+  final List<NoticeEntity> notices;
+  final String? error;
+
+  const StudentNoticesState({
+    this.isLoading = false,
+    this.notices = const [],
+    this.error,
+  });
+}
+
 final studentNoticesProvider =
-    NotifierProvider<StudentNoticesNotifier, Map<int, List<NoticeEntity>>>(
+    NotifierProvider<StudentNoticesNotifier, Map<int, StudentNoticesState>>(
   StudentNoticesNotifier.new,
 );
 
 final studentNoticesForCourseProvider =
-    Provider.family<List<NoticeEntity>, int>((ref, courseId) {
+    Provider.family<StudentNoticesState, int>((ref, courseId) {
   final all = ref.watch(studentNoticesProvider);
-  return all[courseId] ?? [];
+  return all[courseId] ?? const StudentNoticesState(isLoading: true);
 });
 
 class StudentNoticesNotifier
-    extends Notifier<Map<int, List<NoticeEntity>>> {
+    extends Notifier<Map<int, StudentNoticesState>> {
   @override
-  Map<int, List<NoticeEntity>> build() => {};
+  Map<int, StudentNoticesState> build() => {};
 
   Future<void> loadNotices(int courseId) async {
+    state = {
+      ...state,
+      courseId: const StudentNoticesState(isLoading: true),
+    };
     try {
       final notices = await ref.read(_getNoticesUsecaseProvider)(
         courseId: courseId,
       );
-      state = {...state, courseId: notices};
+      state = {
+        ...state,
+        courseId: StudentNoticesState(notices: notices),
+      };
     } catch (e, st) {
       debugPrint('loadNotices error: $e\n$st');
+      state = {
+        ...state,
+        courseId: StudentNoticesState(error: e.toString()),
+      };
+    }
+  }
+
+  void clearError(int courseId) {
+    final current = state[courseId];
+    if (current != null && current.error != null) {
+      state = {
+        ...state,
+        courseId: StudentNoticesState(notices: current.notices),
+      };
     }
   }
 }

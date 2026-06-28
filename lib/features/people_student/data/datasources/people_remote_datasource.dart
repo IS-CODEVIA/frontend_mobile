@@ -9,11 +9,21 @@ class PeopleRemoteDataSource {
   Future<CourseDetailModel> getCourseDetail({required int courseId}) async {
     const query = '''
       query(\$courseID: Int!) {
-        courseParticipants(courseID: \$courseID) {
-          userID
-          name
-          email
-          role
+        courseDetail(courseID: \$courseID) {
+          teacher {
+            userID
+            name
+            email
+            avatarURL
+            roleID
+          }
+          students {
+            userID
+            name
+            email
+            avatarURL
+            roleID
+          }
         }
       }
     ''';
@@ -24,9 +34,7 @@ class PeopleRemoteDataSource {
       requiresAuth: true,
     );
 
-    final list = data['courseParticipants'] as List;
-    return CourseDetailModel.fromParticipants(
-      list.cast<Map<String, dynamic>>(),
-    );
+    final detail = data['courseDetail'] as Map<String, dynamic>;
+    return CourseDetailModel.fromJson(detail);
   }
 }

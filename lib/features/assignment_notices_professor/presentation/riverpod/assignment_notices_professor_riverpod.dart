@@ -19,30 +19,53 @@ final _createNoticeUsecaseProvider = Provider<CreateNoticeUsecase>(
   (ref) => ref.watch(_diProvider).createNoticeUsecase,
 );
 
-final professorNoticesProvider =
-    NotifierProvider<ProfessorNoticesNotifier, Map<int, List<NoticeEntity>>>(
+class ProfessorNoticesState {
+  final bool isLoading;
+  final List<NoticeEntity> notices;
+  final String? error;
+
+  const ProfessorNoticesState({
+    this.isLoading = false,
+    this.notices = const [],
+    this.error,
+  });
+}
+
+final professorNoticesProvider = NotifierProvider<ProfessorNoticesNotifier,
+    Map<int, ProfessorNoticesState>>(
   ProfessorNoticesNotifier.new,
 );
 
 final professorNoticesForCourseProvider =
-    Provider.family<List<NoticeEntity>, int>((ref, courseId) {
+    Provider.family<ProfessorNoticesState, int>((ref, courseId) {
   final all = ref.watch(professorNoticesProvider);
-  return all[courseId] ?? [];
+  return all[courseId] ?? const ProfessorNoticesState(isLoading: true);
 });
 
 class ProfessorNoticesNotifier
-    extends Notifier<Map<int, List<NoticeEntity>>> {
+    extends Notifier<Map<int, ProfessorNoticesState>> {
   @override
-  Map<int, List<NoticeEntity>> build() => {};
+  Map<int, ProfessorNoticesState> build() => {};
 
   Future<void> loadNotices(int courseId) async {
+    state = {
+      ...state,
+      courseId: const ProfessorNoticesState(isLoading: true),
+    };
     try {
       final notices = await ref.read(_getNoticesUsecaseProvider)(
         courseId: courseId,
       );
-      state = {...state, courseId: notices};
+      state = {
+        ...state,
+        courseId: ProfessorNoticesState(notices: notices),
+      };
     } catch (e, st) {
       debugPrint('loadNotices error: $e\n$st');
+      state = {
+        ...state,
+        courseId: ProfessorNoticesState(error: e.toString()),
+      };
     }
   }
 
@@ -57,8 +80,11 @@ class ProfessorNoticesNotifier
         title: title,
         description: description,
       );
-      final current = state[courseId] ?? [];
-      state = {...state, courseId: [...current, notice]};
+      final current = state[courseId]?.notices ?? [];
+      state = {
+        ...state,
+        courseId: ProfessorNoticesState(notices: [...current, notice]),
+      };
       return notice;
     } catch (e, st) {
       debugPrint('createNotice error: $e\n$st');
