@@ -5,6 +5,7 @@ import '../../../../shared/widgets_professor/header_professors.dart';
 import '../../../../shared/widgets_professor/navbar_professors.dart';
 import '../../../../shared/widgets_professor/professor_subject_bottom_nav.dart';
 
+import '../riverpod/transcription_professor_riverpod.dart';
 import '../widgets/transmission_controls.dart';
 import '../widgets/chat_sheet.dart';
 
@@ -24,6 +25,7 @@ class TranscriptorProfessorPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final tState = ref.watch(professorTranscriptionProvider);
 
     return Scaffold(
       drawer: const NavbarProfessors(),
@@ -122,7 +124,43 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  if (tState.finalText != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.check_circle,
+                                  size: 18, color: colorScheme.secondary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Transcripción final',
+                                style: textTheme.titleSmall?.copyWith(
+                                  color: colorScheme.secondary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            tState.finalText!,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 8),
                   Expanded(
                     child: Center(
                       child: SingleChildScrollView(
