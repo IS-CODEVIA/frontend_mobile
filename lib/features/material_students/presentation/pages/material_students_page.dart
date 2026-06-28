@@ -6,6 +6,7 @@ import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
 
 import '../riverpod/materials_riverpod.dart';
+import '../widgets/student_material_card.dart';
 
 class MaterialStudentsPage extends ConsumerStatefulWidget {
   final String subjectName;
@@ -55,13 +56,21 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               children: [
                 const SizedBox(height: 16),
-                Text(
-                  widget.subjectName,
-                  style: textTheme.headlineMedium?.copyWith(
-                    color: colorScheme.secondary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.folder_outlined,
+                        color: colorScheme.secondary, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Material de ${widget.subjectName}',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.secondary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 16),
                 if (materials.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 48),
@@ -83,16 +92,10 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     ),
                   )
                 else
-                  ...materials.map((m) => Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: Icon(
-                            _fileIcon(m.fileType),
-                            color: colorScheme.secondary,
-                          ),
-                          title: Text(m.title),
-                          subtitle: Text(m.createdAt),
-                        ),
+                  ...materials.map((m) => StudentMaterialCard(
+                        material: m,
+                        subjectName: widget.subjectName,
+                        courseId: widget.courseId,
                       )),
                 const SizedBox(height: 40),
               ],
@@ -101,20 +104,5 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
         ],
       ),
     );
-  }
-
-  IconData _fileIcon(String fileType) {
-    switch (fileType) {
-      case 'pdf':
-        return Icons.picture_as_pdf_rounded;
-      case 'video':
-        return Icons.videocam_rounded;
-      case 'document':
-        return Icons.description_rounded;
-      case 'image':
-        return Icons.image_rounded;
-      default:
-        return Icons.insert_drive_file_outlined;
-    }
   }
 }
