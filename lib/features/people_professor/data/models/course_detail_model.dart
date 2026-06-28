@@ -4,11 +4,13 @@ class PersonDetailModel {
   final int userId;
   final String name;
   final String email;
+  final int roleId;
 
   const PersonDetailModel({
     required this.userId,
     required this.name,
     required this.email,
+    required this.roleId,
   });
 
   factory PersonDetailModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +18,7 @@ class PersonDetailModel {
       userId: json['userID'] as int,
       name: json['name'] as String,
       email: json['email'] as String,
+      roleId: json['roleID'] as int? ?? 1,
     );
   }
 
@@ -37,20 +40,14 @@ class CourseDetailModel {
     required this.students,
   });
 
-  factory CourseDetailModel.fromParticipants(List<Map<String, dynamic>> participants) {
-    PersonDetailModel? teacher;
-    final students = <PersonDetailModel>[];
-    for (final p in participants) {
-      final person = PersonDetailModel.fromJson(p);
-      if (p['role'] == 'teacher') {
-        teacher = person;
-      } else {
-        students.add(person);
-      }
-    }
+  factory CourseDetailModel.fromJson(Map<String, dynamic> json) {
+    final teacherJson = json['teacher'] as Map<String, dynamic>;
+    final studentsList = json['students'] as List;
     return CourseDetailModel(
-      teacher: teacher ?? PersonDetailModel(userId: 0, name: 'Unknown', email: ''),
-      students: students,
+      teacher: PersonDetailModel.fromJson(teacherJson),
+      students: studentsList
+          .map((s) => PersonDetailModel.fromJson(s as Map<String, dynamic>))
+          .toList(),
     );
   }
 

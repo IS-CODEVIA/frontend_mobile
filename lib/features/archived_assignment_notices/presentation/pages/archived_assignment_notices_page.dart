@@ -18,7 +18,7 @@ class ArchivedAssignmentNoticesPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final notices = ref.watch(studentNoticesForCourseProvider(0));
+    final state = ref.watch(studentNoticesForCourseProvider(0));
 
     return Scaffold(
       drawer: const NavbarStudents(),
@@ -62,9 +62,9 @@ class ArchivedAssignmentNoticesPage extends ConsumerWidget {
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.only(top: 8, bottom: 24),
-                      itemCount: notices.length,
+                      itemCount: state.notices.length,
                       itemBuilder: (context, index) {
-                        return AssignmentNoticeCard(notice: notices[index]);
+                        return AssignmentNoticeCard(notice: state.notices[index]);
                       },
                     ),
                   ),
