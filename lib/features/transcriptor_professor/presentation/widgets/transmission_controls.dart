@@ -11,6 +11,44 @@ class TransmissionControls extends ConsumerStatefulWidget {
 }
 
 class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
+  final _scrollController = ScrollController();
+
+  @override
+  void didUpdateWidget(TransmissionControls oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _showFullscreen(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: _ProfessorFullscreenTranscription(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -106,7 +144,8 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
             style: FilledButton.styleFrom(
               backgroundColor: colorScheme.primary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -117,63 +156,146 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
     );
   }
 
+  Widget _buildTranscriptionHistory(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    ProfessorTranscriptionState tState,
+  ) {
+    final history = tState.partialHistory;
+    final lastPartial = tState.lastPartialText;
+
+    return ListView(
+      controller: _scrollController,
+      padding: EdgeInsets.zero,
+      children: [
+        ...history.asMap().entries.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  entry.value,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+        if (lastPartial != null &&
+            (history.isEmpty || history.last != lastPartial))
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Transcribiendo...',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.green,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                lastPartial,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontStyle: FontStyle.italic,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
   Widget _buildActiveState(
     ColorScheme colorScheme,
     TextTheme textTheme,
     ProfessorTranscriptionState tState,
     ProfessorTranscriptionNotifier notifier,
   ) {
+    if (tState.partialHistory.length >
+            (ref.read(professorTranscriptionProvider).partialHistory.length -
+                1) &&
+        _scrollController.hasClients) {
+      _scrollToBottom();
+    }
+
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'GRABANDO',
-              style: textTheme.titleMedium?.copyWith(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: 8),
+              Text(
+                'GRABANDO',
+                style: textTheme.titleMedium?.copyWith(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+              const Spacer(),
+              if (tState.partialHistory.isNotEmpty ||
+                  tState.lastPartialText != null)
+                IconButton(
+                  icon: Icon(Icons.fullscreen_rounded,
+                      size: 20, color: colorScheme.primary),
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Ver en pantalla completa',
+                  onPressed: () => _showFullscreen(context),
+                ),
+            ],
+          ),
         ),
-        if (tState.lastPartialText != null) ...[
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
+        if (tState.partialHistory.isNotEmpty ||
+            tState.lastPartialText != null)
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _buildTranscriptionHistory(
+                  colorScheme, textTheme, tState),
             ),
+          )
+        else
+          const Expanded(child: SizedBox.shrink()),
+        if (tState.partialHistory.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
             child: Text(
-              tState.lastPartialText!,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontStyle: FontStyle.italic,
+              '${tState.partialHistory.length} fragmentos recibidos',
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-        ],
         const SizedBox(height: 16),
-        if (tState.partialHistory.length > 1)
-          Text(
-            '${tState.partialHistory.length} fragmentos recibidos',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -203,48 +325,68 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
     ProfessorTranscriptionNotifier notifier,
   ) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                shape: BoxShape.circle,
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: Colors.orange,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'PAUSADO',
-              style: textTheme.titleMedium?.copyWith(
-                color: Colors.orange,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: 8),
+              Text(
+                'PAUSADO',
+                style: textTheme.titleMedium?.copyWith(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+              const Spacer(),
+              if (tState.partialHistory.isNotEmpty ||
+                  tState.lastPartialText != null)
+                IconButton(
+                  icon: Icon(Icons.fullscreen_rounded,
+                      size: 20, color: colorScheme.primary),
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Ver en pantalla completa',
+                  onPressed: () => _showFullscreen(context),
+                ),
+            ],
+          ),
         ),
-        if (tState.lastPartialText != null) ...[
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
+        if (tState.partialHistory.isNotEmpty ||
+            tState.lastPartialText != null)
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _buildTranscriptionHistory(
+                  colorScheme, textTheme, tState),
             ),
+          )
+        else
+          const Expanded(child: SizedBox.shrink()),
+        if (tState.partialHistory.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
             child: Text(
-              tState.lastPartialText!,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontStyle: FontStyle.italic,
+              '${tState.partialHistory.length} fragmentos recibidos',
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-        ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -318,6 +460,162 @@ class _ControlButton extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProfessorFullscreenTranscription extends ConsumerStatefulWidget {
+  const _ProfessorFullscreenTranscription();
+
+  @override
+  ConsumerState<_ProfessorFullscreenTranscription> createState() =>
+      _ProfessorFullscreenTranscriptionState();
+}
+
+class _ProfessorFullscreenTranscriptionState
+    extends ConsumerState<_ProfessorFullscreenTranscription> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final tState = ref.watch(professorTranscriptionProvider);
+    final history = tState.partialHistory;
+    final lastPartial = tState.lastPartialText;
+
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: colorScheme.surface,
+        title: Text(
+          'Transcripción en vivo',
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.secondary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.close, color: colorScheme.onSurface),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          if (tState.isRecording)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'GRABANDO',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+      body: history.isEmpty && lastPartial == null
+          ? Center(
+              child: Text(
+                'Esperando transcripción...',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          : ListView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(24),
+              children: [
+                ...history.map(
+                  (text) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      text,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface,
+                        height: 1.5,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+                if (lastPartial != null &&
+                    (history.isEmpty || history.last != lastPartial))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Transcribiendo...',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: Colors.green,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        lastPartial,
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
     );
   }
 }

@@ -162,11 +162,7 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                     ),
                   const SizedBox(height: 8),
                   Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: TransmissionControls(),
-                      ),
-                    ),
+                    child: TransmissionControls(),
                   ),
                 ],
               ),
