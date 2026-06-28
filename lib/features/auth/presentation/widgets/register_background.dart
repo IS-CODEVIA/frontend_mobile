@@ -29,6 +29,7 @@ class _RegisterBackgroundPainter extends CustomPainter {
   });
 
   
+  @override
   void paint(Canvas canvas, Size size) {
     final paintSecondary = Paint()
       ..color = secondaryColor
@@ -82,5 +83,6 @@ class _RegisterBackgroundPainter extends CustomPainter {
 
   
 
+  @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

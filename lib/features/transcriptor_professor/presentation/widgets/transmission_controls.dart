@@ -1,33 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/network/transcription_service.dart';
+import '../riverpod/transcription_professor_riverpod.dart';
 
-enum TransmissionStatus { idle, recording, paused }
-
-class TransmissionControls extends StatefulWidget {
+class TransmissionControls extends ConsumerStatefulWidget {
   const TransmissionControls({super.key});
 
   @override
-  State<TransmissionControls> createState() => _TransmissionControlsState();
+  ConsumerState<TransmissionControls> createState() =>
+      _TransmissionControlsState();
 }
 
-class _TransmissionControlsState extends State<TransmissionControls> {
-  TransmissionStatus _status = TransmissionStatus.idle;
-
+class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final tState = ref.watch(professorTranscriptionProvider);
+    final notifier = ref.read(professorTranscriptionProvider.notifier);
 
-    switch (_status) {
-      case TransmissionStatus.idle:
-        return _buildIdleState(colorScheme, textTheme);
-      case TransmissionStatus.recording:
-        return _buildActiveState(colorScheme, textTheme);
-      case TransmissionStatus.paused:
-        return _buildPausedState(colorScheme, textTheme);
+    if (tState.error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifier.clearError();
+        _showError(context, tState.error!);
+      });
     }
+
+    if (tState.connectionState == TranscriptionConnectionState.connecting) {
+      return _buildConnectingState(colorScheme, textTheme);
+    }
+
+    if (!tState.isRecording &&
+        tState.connectionState != TranscriptionConnectionState.connected) {
+      return _buildIdleState(colorScheme, textTheme, notifier);
+    }
+
+    if (tState.isRecording) {
+      return _buildActiveState(colorScheme, textTheme, tState, notifier);
+    }
+
+    return _buildPausedState(colorScheme, textTheme, tState, notifier);
   }
 
-  Widget _buildIdleState(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildConnectingState(ColorScheme colorScheme, TextTheme textTheme) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 24),
+          Text(
+            'Conectando...',
+            style: textTheme.titleLarge?.copyWith(
+              color: colorScheme.secondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIdleState(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    ProfessorTranscriptionNotifier notifier,
+  ) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -63,7 +101,7 @@ class _TransmissionControlsState extends State<TransmissionControls> {
           ),
           const SizedBox(height: 32),
           FilledButton.icon(
-            onPressed: () => setState(() => _status = TransmissionStatus.recording),
+            onPressed: () => notifier.startTransmission(),
             icon: const Icon(Icons.play_arrow, size: 28),
             label: const Text('Comenzar transmision'),
             style: FilledButton.styleFrom(
@@ -80,7 +118,12 @@ class _TransmissionControlsState extends State<TransmissionControls> {
     );
   }
 
-  Widget _buildActiveState(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildActiveState(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    ProfessorTranscriptionState tState,
+    ProfessorTranscriptionNotifier notifier,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -105,7 +148,33 @@ class _TransmissionControlsState extends State<TransmissionControls> {
             ),
           ],
         ),
-        const SizedBox(height: 32),
+        if (tState.lastPartialText != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              tState.lastPartialText!,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        if (tState.partialHistory.length > 1)
+          Text(
+            '${tState.partialHistory.length} fragmentos recibidos',
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -113,14 +182,14 @@ class _TransmissionControlsState extends State<TransmissionControls> {
               icon: Icons.pause_rounded,
               label: 'Pausar',
               color: colorScheme.tertiary,
-              onTap: () => setState(() => _status = TransmissionStatus.paused),
+              onTap: () => notifier.pauseTransmission(),
             ),
             const SizedBox(width: 24),
             _ControlButton(
               icon: Icons.stop_rounded,
               label: 'Terminar',
               color: Colors.red,
-              onTap: () => setState(() => _status = TransmissionStatus.idle),
+              onTap: () => notifier.stopTransmission(),
             ),
           ],
         ),
@@ -128,7 +197,12 @@ class _TransmissionControlsState extends State<TransmissionControls> {
     );
   }
 
-  Widget _buildPausedState(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildPausedState(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    ProfessorTranscriptionState tState,
+    ProfessorTranscriptionNotifier notifier,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -153,7 +227,25 @@ class _TransmissionControlsState extends State<TransmissionControls> {
             ),
           ],
         ),
-        const SizedBox(height: 32),
+        if (tState.lastPartialText != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              tState.lastPartialText!,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -161,18 +253,28 @@ class _TransmissionControlsState extends State<TransmissionControls> {
               icon: Icons.play_arrow_rounded,
               label: 'Reanudar',
               color: colorScheme.primary,
-              onTap: () => setState(() => _status = TransmissionStatus.recording),
+              onTap: () => notifier.resumeTransmission(),
             ),
             const SizedBox(width: 24),
             _ControlButton(
               icon: Icons.stop_rounded,
               label: 'Terminar',
               color: Colors.red,
-              onTap: () => setState(() => _status = TransmissionStatus.idle),
+              onTap: () => notifier.stopTransmission(),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }

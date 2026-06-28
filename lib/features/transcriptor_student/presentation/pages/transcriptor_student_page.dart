@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/header_students.dart';
-import '../../../../shared/widgets/nabvar_students.dart'; 
-import '../../../../shared/widgets/subject_bottom_nav.dart'; 
+import '../../../../shared/widgets/nabvar_students.dart';
+import '../../../../shared/widgets/subject_bottom_nav.dart';
 
 import '../riverpod/transcription_riverpod.dart';
 import '../widgets/live_status_indicator.dart';
 import '../widgets/transcription_box.dart';
 import '../widgets/chat_sheet.dart';
 
-class TranscriptorStudentPage extends ConsumerWidget {
+class TranscriptorStudentPage extends ConsumerStatefulWidget {
   final String subjectName;
   final int courseId;
 
@@ -21,23 +21,51 @@ class TranscriptorStudentPage extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TranscriptorStudentPage> createState() =>
+      _TranscriptorStudentPageState();
+}
+
+class _TranscriptorStudentPageState
+    extends ConsumerState<TranscriptorStudentPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(transcriptionProvider.notifier).connect();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final tState = ref.watch(transcriptionProvider);
+    final notifier = ref.read(transcriptionProvider.notifier);
 
-    final transcriptionMessages = ref.watch(transcriptionProvider);
+    if (tState.error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifier.clearError();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tState.error!),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      });
+    }
+
+    final displayMessages = tState.messages;
+    final partial = tState.currentPartial;
 
     return Scaffold(
-      drawer: const NavbarStudents(), 
+      drawer: const NavbarStudents(),
       bottomNavigationBar: SubjectBottomNav(
-        subjectName: subjectName,
-        courseId: courseId,
+        subjectName: widget.subjectName,
+        courseId: widget.courseId,
       ),
-
       body: Column(
         children: [
           const HeaderStudents(),
-          
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -45,31 +73,28 @@ class TranscriptorStudentPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  
-                  // Título de la materia
                   Text(
-                    subjectName,
+                    widget.subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
-              
                   const LiveStatusIndicator(),
                   const SizedBox(height: 16),
-                  
-                 
                   Expanded(
-                    child: TranscriptionBox(messages: transcriptionMessages),
+                    child: TranscriptionBox(
+                      messages: displayMessages,
+                      partialText: partial,
+                      connectionState: tState.connectionState,
+                    ),
                   ),
-                  
-                  // Botón para abrir chat con el docente
                   Align(
                     alignment: Alignment.centerRight,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                      padding:
+                          const EdgeInsets.only(top: 16.0, bottom: 8.0),
                       child: IconButton(
                         icon: const Icon(Icons.back_hand_outlined),
                         color: colorScheme.onSurface,
