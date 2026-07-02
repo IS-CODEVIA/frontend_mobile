@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../riverpod/save_transcription_riverpod.dart';
+import '../riverpod/transcription_professor_riverpod.dart';
 
 class SaveTranscriptionSheet extends ConsumerStatefulWidget {
   final String subjectName;
@@ -32,7 +32,9 @@ class _SaveTranscriptionSheetState
     super.initState();
     _selectedDate = DateTime.now();
     _selectedTime = TimeOfDay.now();
-    ref.read(saveTranscriptionProvider.notifier).reset();
+    Future.microtask(
+      () => ref.read(saveTranscriptionProvider.notifier).reset(),
+    );
   }
 
   @override
@@ -68,14 +70,12 @@ class _SaveTranscriptionSheetState
   }
 
   String _toIsoDateTime() {
-    final dt = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
-    );
-    return dt.toIso8601String();
+    final y = _selectedDate.year;
+    final m = _selectedDate.month.toString().padLeft(2, '0');
+    final d = _selectedDate.day.toString().padLeft(2, '0');
+    final h = _selectedTime.hour.toString().padLeft(2, '0');
+    final min = _selectedTime.minute.toString().padLeft(2, '0');
+    return '$y-$m-${d}T$h:$min:00Z';
   }
 
   @override
@@ -398,8 +398,8 @@ class _SaveTranscriptionSheetState
     if (!mounted) return;
 
     if (success) {
-      Navigator.of(context).pop();
-      _showSuccessDialog(context, _topicController.text.trim());
+      await _showSuccessDialog(context, _topicController.text.trim());
+      if (mounted) Navigator.of(context).pop();
     } else {
       final saveState = ref.read(saveTranscriptionProvider);
       _showErrorDialog(
@@ -409,11 +409,11 @@ class _SaveTranscriptionSheetState
     }
   }
 
-  void _showSuccessDialog(BuildContext context, String topic) {
+  Future<void> _showSuccessDialog(BuildContext context, String topic) async {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
