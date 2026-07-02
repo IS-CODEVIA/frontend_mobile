@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../riverpod/transcription_professor_riverpod.dart';
+import 'save_transcription_sheet.dart';
 
 class TransmissionControls extends ConsumerStatefulWidget {
-  const TransmissionControls({super.key});
+  final String subjectName;
+  final int courseId;
+
+  const TransmissionControls({
+    super.key,
+    required this.subjectName,
+    required this.courseId,
+  });
 
   @override
   ConsumerState<TransmissionControls> createState() =>
@@ -308,9 +316,13 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
             const SizedBox(width: 24),
             _ControlButton(
               icon: Icons.stop_rounded,
-              label: 'Terminar',
+              label: 'Terminar clase',
               color: Colors.red,
-              onTap: () => notifier.stopTransmission(),
+              onTap: () async {
+                await notifier.stopTransmission();
+                if (!mounted) return;
+                _showSaveSheet(context);
+              },
             ),
           ],
         ),
@@ -399,13 +411,31 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
             const SizedBox(width: 24),
             _ControlButton(
               icon: Icons.stop_rounded,
-              label: 'Terminar',
+              label: 'Terminar clase',
               color: Colors.red,
-              onTap: () => notifier.stopTransmission(),
+              onTap: () async {
+                await notifier.stopTransmission();
+                if (!mounted) return;
+                _showSaveSheet(context);
+              },
             ),
           ],
         ),
       ],
+    );
+  }
+
+  void _showSaveSheet(BuildContext context) {
+    final tState = ref.read(professorTranscriptionProvider);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SaveTranscriptionSheet(
+        subjectName: widget.subjectName,
+        courseId: widget.courseId,
+        fullText: tState.finalText ?? '',
+      ),
     );
   }
 
