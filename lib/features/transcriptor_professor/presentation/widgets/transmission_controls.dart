@@ -427,6 +427,16 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
 
   void _showSaveSheet(BuildContext context) {
     final tState = ref.read(professorTranscriptionProvider);
+    final buffer = StringBuffer();
+    for (final text in tState.partialHistory) {
+      buffer.writeln(text);
+    }
+    if (tState.finalText != null &&
+        (tState.partialHistory.isEmpty ||
+            tState.partialHistory.last != tState.finalText)) {
+      buffer.writeln(tState.finalText);
+    }
+    final fullText = buffer.toString().trim();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -434,7 +444,7 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
       builder: (_) => SaveTranscriptionSheet(
         subjectName: widget.subjectName,
         courseId: widget.courseId,
-        fullText: tState.finalText ?? '',
+        fullText: fullText,
       ),
     );
   }
