@@ -50,6 +50,8 @@ class ProfessorTranscriptionNotifier
   StreamSubscription? _finalSub;
   StreamSubscription? _stateSub;
   StreamSubscription? _errorSub;
+  final List<int> _pcmBuffer = [];
+  static const int _maxChunkSize = 131072;
 
   @override
   ProfessorTranscriptionState build() {
@@ -107,27 +109,11 @@ class ProfessorTranscriptionNotifier
         ),
       );
 
-      final pcmBuffer = <int>[];
-      const maxChunkSize = 131072;
-
       _audioSub = pcmStream.listen(
         (chunk) {
-          pcmBuffer.addAll(chunk);
-          while (pcmBuffer.length >= maxChunkSize) {
-            _service!.sendAudioChunk(
-              Uint8List.sublistView(
-                Uint8List.fromList(pcmBuffer),
-                0,
-                maxChunkSize,
-              ),
-            );
-            pcmBuffer.removeRange(0, maxChunkSize);
-          }
-        },
-        onDone: () {
-          if (pcmBuffer.isNotEmpty) {
-            _service!.sendAudioChunk(Uint8List.fromList(pcmBuffer));
-            pcmBuffer.clear();
+          _pcmBuffer.addAll(chunk);
+          while (_pcmBuffer.length >= _maxChunkSize) {
+            _sendChunk();
           }
         },
         onError: (err) {
@@ -157,27 +143,11 @@ class ProfessorTranscriptionNotifier
         ),
       );
 
-      final pcmBuffer = <int>[];
-      const maxChunkSize = 131072;
-
       _audioSub = pcmStream.listen(
         (chunk) {
-          pcmBuffer.addAll(chunk);
-          while (pcmBuffer.length >= maxChunkSize) {
-            _service!.sendAudioChunk(
-              Uint8List.sublistView(
-                Uint8List.fromList(pcmBuffer),
-                0,
-                maxChunkSize,
-              ),
-            );
-            pcmBuffer.removeRange(0, maxChunkSize);
-          }
-        },
-        onDone: () {
-          if (pcmBuffer.isNotEmpty) {
-            _service!.sendAudioChunk(Uint8List.fromList(pcmBuffer));
-            pcmBuffer.clear();
+          _pcmBuffer.addAll(chunk);
+          while (_pcmBuffer.length >= _maxChunkSize) {
+            _sendChunk();
           }
         },
         onError: (err) => state = state.copyWith(error: 'Audio error: $err'),
@@ -190,9 +160,14 @@ class ProfessorTranscriptionNotifier
 
   Future<void> stopTransmission() async {
     _audioSub?.cancel();
-    _service?.stopSession();
+
+    if (_pcmBuffer.isNotEmpty) {
+      _sendChunk();
+    }
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    await _service?.sendStopAndWaitForFinal();
     await _recorder?.stop();
-    _service?.disconnect();
     state = state.copyWith(isRecording: false);
   }
 
@@ -211,6 +186,15 @@ class ProfessorTranscriptionNotifier
     _errorSub = null;
     _recorder = null;
     _service = null;
+  }
+
+  void _sendChunk() {
+    if (_pcmBuffer.isEmpty) return;
+    final chunkLength = _pcmBuffer.length > _maxChunkSize ? _maxChunkSize : _pcmBuffer.length;
+    _service!.sendAudioChunk(
+      Uint8List.sublistView(Uint8List.fromList(_pcmBuffer), 0, chunkLength),
+    );
+    _pcmBuffer.removeRange(0, chunkLength);
   }
 
   void clearError() {

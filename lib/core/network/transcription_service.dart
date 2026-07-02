@@ -46,7 +46,7 @@ class TranscriptionService {
 
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse('ws://32.194.62.45:8000/ws/transcribe'),
+        Uri.parse('wss://l1agepurd7n5w3-8000.proxy.runpod.net/ws/transcribe'),
       );
 
       _sessionId = _uuid.v4();
@@ -114,8 +114,27 @@ class TranscriptionService {
     }
   }
 
+  void sendRawMessage(String message) {
+    if (_channel != null &&
+        _currentState == TranscriptionConnectionState.connected) {
+      _channel!.sink.add(message);
+    }
+  }
+
   void stopSession() {
     _sendJson({'type': 'stop'});
+  }
+
+  Future<void> sendStopAndWaitForFinal({Duration timeout = const Duration(seconds: 10)}) async {
+    _sendJson({'type': 'stop'});
+    final completer = Completer<void>();
+    StreamSubscription? sub;
+    sub = _finalCtrl.stream.listen((_) {
+      sub?.cancel();
+      if (!completer.isCompleted) completer.complete();
+    });
+    await completer.future.timeout(timeout, onTimeout: () => sub?.cancel());
+    disconnect();
   }
 
   void disconnect() {
