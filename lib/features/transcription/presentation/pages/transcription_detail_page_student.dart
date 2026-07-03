@@ -31,7 +31,7 @@ class TranscriptionDetailStudentPage extends ConsumerStatefulWidget {
 
 class _TranscriptionDetailStudentPageState
     extends ConsumerState<TranscriptionDetailStudentPage> {
-  StudyPlanEntity? _studyPlan;
+  FeedbackEntity? _studyPlan;
   bool _isLoadingFeedback = false;
   String? _feedbackError;
 
@@ -85,7 +85,6 @@ class _TranscriptionDetailStudentPageState
       final plan = await dataSource.generateFeedback(
         sessionId: 'session-${widget.transcription.transcriptionId}',
         userId: user.userId,
-        transcription: widget.transcription.fullText,
       );
       setState(() {
         _studyPlan = plan;

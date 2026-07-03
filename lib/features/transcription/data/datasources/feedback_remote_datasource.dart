@@ -5,30 +5,33 @@ import '../../domain/entities/study_plan_entity.dart';
 
 class FeedbackRemoteDataSource {
   static const _baseUrl =
-      'https://l1agepurd7n5w3-8080.proxy.runpod.net';
+      'https://b5w3o5l2bxdzw7-8080.proxy.runpod.net';
 
-  Future<StudyPlanEntity> generateFeedback({
+  Future<FeedbackEntity> generateFeedback({
     required String sessionId,
     required int userId,
-    required String transcription,
+    Map<String, dynamic>? studyPlan,
   }) async {
     final uri = Uri.parse('$_baseUrl/feedback/generate');
+    final body = <String, dynamic>{
+      'session_id': sessionId,
+      'user_id': userId.toString(),
+    };
+    if (studyPlan != null) {
+      body['study_plan'] = studyPlan;
+    }
+
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'session_id': sessionId,
-        'user_id': userId.toString(),
-        'transcription': transcription,
-        'study_plan': {},
-      }),
+      body: jsonEncode(body),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return StudyPlanModel.fromJson(data).toEntity();
+      return FeedbackModel.fromJson(data).toEntity();
     }
-    final body = response.body.isNotEmpty ? response.body : 'sin respuesta';
-    throw Exception('Error del servidor ($response.statusCode): $body');
+    final errorBody = response.body.isNotEmpty ? response.body : 'sin respuesta';
+    throw Exception('Error del servidor ($response.statusCode): $errorBody');
   }
 }
