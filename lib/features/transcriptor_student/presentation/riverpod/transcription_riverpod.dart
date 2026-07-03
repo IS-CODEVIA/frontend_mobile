@@ -1,4 +1,5 @@
-export '../../../../core/network/transcription_service.dart' show TranscriptionConnectionState;
+export '../../../../core/network/transcription_service.dart'
+    show TranscriptionConnectionState;
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +35,8 @@ class StudentTranscriptionState {
   }
 }
 
-class StudentTranscriptionNotifier extends Notifier<StudentTranscriptionState> {
+class StudentTranscriptionNotifier
+    extends Notifier<StudentTranscriptionState> {
   TranscriptionService? _service;
   StreamSubscription? _partialSub;
   StreamSubscription? _finalSub;
@@ -44,21 +46,21 @@ class StudentTranscriptionNotifier extends Notifier<StudentTranscriptionState> {
   @override
   StudentTranscriptionState build() {
     ref.onDispose(() {
-      _partialSub?.cancel();
-      _finalSub?.cancel();
-      _stateSub?.cancel();
-      _errorSub?.cancel();
-      _service?.dispose();
+      _cleanup();
     });
     return const StudentTranscriptionState();
   }
 
-  Future<void> connect() async {
+  String _sessionIdForCourse(int courseId) => 'live:$courseId';
+
+  Future<void> connect(int courseId) async {
     final user = ref.read(authViewModelProvider).user;
     if (user == null) {
       state = state.copyWith(error: 'Debes iniciar sesión primero');
       return;
     }
+
+    _cleanup();
 
     _service = TranscriptionService();
 
@@ -84,7 +86,10 @@ class StudentTranscriptionNotifier extends Notifier<StudentTranscriptionState> {
       );
     });
 
-    await _service!.connectAndStart(userId: user.userId.toString());
+    await _service!.connectAndStart(
+      userId: user.userId.toString(),
+      sessionId: _sessionIdForCourse(courseId),
+    );
   }
 
   void disconnect() {
@@ -92,11 +97,25 @@ class StudentTranscriptionNotifier extends Notifier<StudentTranscriptionState> {
     _service?.disconnect();
   }
 
+  void _cleanup() {
+    _partialSub?.cancel();
+    _finalSub?.cancel();
+    _stateSub?.cancel();
+    _errorSub?.cancel();
+    _service?.dispose();
+    _partialSub = null;
+    _finalSub = null;
+    _stateSub = null;
+    _errorSub = null;
+    _service = null;
+  }
+
   void clearError() {
     state = state.copyWith(error: null);
   }
 }
 
-final transcriptionProvider = NotifierProvider<StudentTranscriptionNotifier, StudentTranscriptionState>(
+final transcriptionProvider =
+    NotifierProvider<StudentTranscriptionNotifier, StudentTranscriptionState>(
   StudentTranscriptionNotifier.new,
 );

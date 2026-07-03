@@ -1,4 +1,5 @@
-export '../../../../core/network/transcription_service.dart' show TranscriptionConnectionState;
+export '../../../../core/network/transcription_service.dart'
+    show TranscriptionConnectionState;
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -29,6 +30,7 @@ class ProfessorTranscriptionState {
   final String? finalText;
   final String? error;
   final List<String> partialHistory;
+  final List<String> finalHistory;
 
   const ProfessorTranscriptionState({
     this.connectionState = TranscriptionConnectionState.disconnected,
@@ -37,6 +39,7 @@ class ProfessorTranscriptionState {
     this.finalText,
     this.error,
     this.partialHistory = const [],
+    this.finalHistory = const [],
   });
 
   ProfessorTranscriptionState copyWith({
@@ -46,6 +49,7 @@ class ProfessorTranscriptionState {
     String? finalText,
     String? error,
     List<String>? partialHistory,
+    List<String>? finalHistory,
   }) {
     return ProfessorTranscriptionState(
       connectionState: connectionState ?? this.connectionState,
@@ -54,6 +58,7 @@ class ProfessorTranscriptionState {
       finalText: finalText ?? this.finalText,
       error: error,
       partialHistory: partialHistory ?? this.partialHistory,
+      finalHistory: finalHistory ?? this.finalHistory,
     );
   }
 }
@@ -67,6 +72,8 @@ class ProfessorTranscriptionNotifier
   StreamSubscription? _finalSub;
   StreamSubscription? _stateSub;
   StreamSubscription? _errorSub;
+  final List<int> _pcmBuffer = [];
+  static const int _maxChunkSize = 131072;
 
   @override
   ProfessorTranscriptionState build() {
@@ -76,14 +83,18 @@ class ProfessorTranscriptionNotifier
     return const ProfessorTranscriptionState();
   }
 
-  Future<void> startTransmission() async {
+  String _sessionIdForCourse(int courseId) => 'live:$courseId';
+
+  Future<void> startTransmission(int courseId) async {
     final user = ref.read(authViewModelProvider).user;
     if (user == null) {
       state = state.copyWith(error: 'Debes iniciar sesión primero');
       return;
     }
 
-    state = state.copyWith(error: null);
+    _stopInternal();
+    _pcmBuffer.clear();
+    state = const ProfessorTranscriptionState();
 
     _service = TranscriptionService();
     _recorder = AudioRecorder();
@@ -108,13 +119,16 @@ class ProfessorTranscriptionNotifier
       final text = data['text'] as String? ?? '';
       state = state.copyWith(
         finalText: text,
-        isRecording: false,
+        finalHistory: [...state.finalHistory, text],
         lastPartialText: null,
       );
     });
 
     try {
-      await _service!.connectAndStart(userId: user.userId.toString());
+      await _service!.connectAndStart(
+        userId: user.userId.toString(),
+        sessionId: _sessionIdForCourse(courseId),
+      );
 
       final pcmStream = await _recorder!.startStream(
         const RecordConfig(
@@ -124,27 +138,11 @@ class ProfessorTranscriptionNotifier
         ),
       );
 
-      final pcmBuffer = <int>[];
-      const maxChunkSize = 131072;
-
       _audioSub = pcmStream.listen(
         (chunk) {
-          pcmBuffer.addAll(chunk);
-          while (pcmBuffer.length >= maxChunkSize) {
-            _service!.sendAudioChunk(
-              Uint8List.sublistView(
-                Uint8List.fromList(pcmBuffer),
-                0,
-                maxChunkSize,
-              ),
-            );
-            pcmBuffer.removeRange(0, maxChunkSize);
-          }
-        },
-        onDone: () {
-          if (pcmBuffer.isNotEmpty) {
-            _service!.sendAudioChunk(Uint8List.fromList(pcmBuffer));
-            pcmBuffer.clear();
+          _pcmBuffer.addAll(chunk);
+          while (_pcmBuffer.length >= _maxChunkSize) {
+            _sendChunk();
           }
         },
         onError: (err) {
@@ -174,27 +172,11 @@ class ProfessorTranscriptionNotifier
         ),
       );
 
-      final pcmBuffer = <int>[];
-      const maxChunkSize = 131072;
-
       _audioSub = pcmStream.listen(
         (chunk) {
-          pcmBuffer.addAll(chunk);
-          while (pcmBuffer.length >= maxChunkSize) {
-            _service!.sendAudioChunk(
-              Uint8List.sublistView(
-                Uint8List.fromList(pcmBuffer),
-                0,
-                maxChunkSize,
-              ),
-            );
-            pcmBuffer.removeRange(0, maxChunkSize);
-          }
-        },
-        onDone: () {
-          if (pcmBuffer.isNotEmpty) {
-            _service!.sendAudioChunk(Uint8List.fromList(pcmBuffer));
-            pcmBuffer.clear();
+          _pcmBuffer.addAll(chunk);
+          while (_pcmBuffer.length >= _maxChunkSize) {
+            _sendChunk();
           }
         },
         onError: (err) => state = state.copyWith(error: 'Audio error: $err'),
@@ -207,9 +189,14 @@ class ProfessorTranscriptionNotifier
 
   Future<void> stopTransmission() async {
     _audioSub?.cancel();
-    _service?.stopSession();
+
+    if (_pcmBuffer.isNotEmpty) {
+      _sendChunk();
+    }
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    await _service?.sendStopAndWaitForFinal();
     await _recorder?.stop();
-    _service?.disconnect();
     state = state.copyWith(isRecording: false);
   }
 
@@ -221,6 +208,7 @@ class ProfessorTranscriptionNotifier
     _errorSub?.cancel();
     _recorder?.dispose();
     _service?.dispose();
+    _pcmBuffer.clear();
     _audioSub = null;
     _partialSub = null;
     _finalSub = null;
@@ -228,6 +216,16 @@ class ProfessorTranscriptionNotifier
     _errorSub = null;
     _recorder = null;
     _service = null;
+  }
+
+  void _sendChunk() {
+    if (_pcmBuffer.isEmpty) return;
+    final chunkLength =
+        _pcmBuffer.length > _maxChunkSize ? _maxChunkSize : _pcmBuffer.length;
+    _service!.sendAudioChunk(
+      Uint8List.sublistView(Uint8List.fromList(_pcmBuffer), 0, chunkLength),
+    );
+    _pcmBuffer.removeRange(0, chunkLength);
   }
 
   void clearError() {
@@ -268,8 +266,7 @@ class SaveTranscriptionState {
   }
 }
 
-class SaveTranscriptionNotifier
-    extends Notifier<SaveTranscriptionState> {
+class SaveTranscriptionNotifier extends Notifier<SaveTranscriptionState> {
   @override
   SaveTranscriptionState build() => const SaveTranscriptionState();
 
@@ -308,7 +305,7 @@ class SaveTranscriptionNotifier
   }
 }
 
-final saveTranscriptionProvider = NotifierProvider<
-    SaveTranscriptionNotifier, SaveTranscriptionState>(
+final saveTranscriptionProvider =
+    NotifierProvider<SaveTranscriptionNotifier, SaveTranscriptionState>(
   SaveTranscriptionNotifier.new,
 );

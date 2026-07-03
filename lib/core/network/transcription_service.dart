@@ -17,6 +17,7 @@ class TranscriptionService {
   String? _sessionId;
   String? _userId;
   Timer? _reconnectTimer;
+  bool _intentionalDisconnect = false;
 
   final _partialCtrl = StreamController<Map<String, dynamic>>.broadcast();
   final _finalCtrl = StreamController<Map<String, dynamic>>.broadcast();
@@ -39,21 +40,26 @@ class TranscriptionService {
   Future<void> connectAndStart({
     required String userId,
     String language = 'es',
+    String? sessionId,
   }) async {
     if (_currentState == TranscriptionConnectionState.connected) return;
+    _intentionalDisconnect = false;
     _userId = userId;
     _updateState(TranscriptionConnectionState.connecting);
 
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse('wss://9awbvpdnfjjs3v-8080.proxy.runpod.net/ws/transcribe'),
+        Uri.parse('wss://9awbvpdnfjjs3v-8000.proxy.runpod.net/ws/transcribe'),
       );
 
-      _sessionId = _uuid.v4();
+      await _channel!.ready;
+
+      _sessionId = sessionId ?? _uuid.v4();
       _sendJson({
         'type': 'start',
         'session_id': _sessionId,
         'user_id': _userId,
+        'mode': 'speaker',
         'language': language,
       });
 
@@ -79,12 +85,12 @@ class TranscriptionService {
   }
 
   void _scheduleReconnect() {
+    if (_intentionalDisconnect) return;
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 5), () {
-      if (_userId != null && _sessionId != null) {
-        connectAndStart(userId: _userId!);
-      } else if (_userId != null) {
-        connectAndStart(userId: _userId!);
+      if (_intentionalDisconnect) return;
+      if (_userId != null) {
+        connectAndStart(userId: _userId!, sessionId: _sessionId);
       }
     });
   }
@@ -110,6 +116,8 @@ class TranscriptionService {
   void sendAudioChunk(Uint8List chunk) {
     if (_channel != null &&
         _currentState == TranscriptionConnectionState.connected) {
+      print(
+          'sendAudioChunk: user_id=$_userId, session_id=$_sessionId, chunkSize=${chunk.length}');
       _channel!.sink.add(chunk);
     }
   }
@@ -125,7 +133,8 @@ class TranscriptionService {
     _sendJson({'type': 'stop'});
   }
 
-  Future<void> sendStopAndWaitForFinal({Duration timeout = const Duration(seconds: 10)}) async {
+  Future<void> sendStopAndWaitForFinal(
+      {Duration timeout = const Duration(seconds: 10)}) async {
     _sendJson({'type': 'stop'});
     final completer = Completer<void>();
     StreamSubscription? sub;
@@ -138,6 +147,7 @@ class TranscriptionService {
   }
 
   void disconnect() {
+    _intentionalDisconnect = true;
     _reconnectTimer?.cancel();
     _channel?.sink.close();
     _channel = null;
@@ -156,6 +166,7 @@ class TranscriptionService {
   }
 
   void dispose() {
+    _intentionalDisconnect = true;
     disconnect();
     _partialCtrl.close();
     _finalCtrl.close();

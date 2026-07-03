@@ -31,7 +31,7 @@ class _TranscriptorStudentPageState
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(transcriptionProvider.notifier).connect();
+      ref.read(transcriptionProvider.notifier).connect(widget.courseId);
     });
   }
 

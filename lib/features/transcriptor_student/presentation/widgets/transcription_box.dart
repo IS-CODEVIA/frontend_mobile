@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../riverpod/transcription_riverpod.dart';
 import '../../domain/models/transcription_message.dart';
 
-class TranscriptionBox extends StatefulWidget {
+class TranscriptionBox extends ConsumerStatefulWidget {
   final List<TranscriptionMessage> messages;
   final String? partialText;
   final TranscriptionConnectionState connectionState;
@@ -17,29 +17,22 @@ class TranscriptionBox extends StatefulWidget {
   });
 
   @override
-  State<TranscriptionBox> createState() => _TranscriptionBoxState();
+  ConsumerState<TranscriptionBox> createState() => _TranscriptionBoxState();
 }
 
-class _TranscriptionBoxState extends State<TranscriptionBox> {
+class _TranscriptionBoxState extends ConsumerState<TranscriptionBox> {
   final _scrollController = ScrollController();
   var _autoScroll = true;
+  int _lastMessageCount = 0;
+  String? _lastPartial;
 
-  @override
-  void didUpdateWidget(TranscriptionBox oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.messages.length > oldWidget.messages.length ||
-        widget.partialText != oldWidget.partialText) {
-      _scrollToBottom();
-    }
-  }
-
-  void _scrollToBottom() {
+  void _scheduleScrollToBottom() {
     if (!_autoScroll || !_scrollController.hasClients) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
       }
@@ -72,6 +65,13 @@ class _TranscriptionBoxState extends State<TranscriptionBox> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    if (widget.messages.length > _lastMessageCount ||
+        widget.partialText != _lastPartial) {
+      _lastMessageCount = widget.messages.length;
+      _lastPartial = widget.partialText;
+      _scheduleScrollToBottom();
+    }
 
     return Container(
       width: double.infinity,
@@ -148,12 +148,8 @@ class _TranscriptionBoxState extends State<TranscriptionBox> {
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
                   if (notification is UserScrollNotification) {
-                    if (notification.direction == ScrollDirection.reverse) {
-                      _autoScroll = true;
-                    } else if (notification.direction ==
-                        ScrollDirection.forward) {
-                      _autoScroll = false;
-                    }
+                    _autoScroll =
+                        notification.direction == ScrollDirection.reverse;
                   }
                   return false;
                 },
