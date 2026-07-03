@@ -41,6 +41,7 @@ class TranscriptionService {
     required String userId,
     String language = 'es',
     String? sessionId,
+    String mode = 'speaker',
   }) async {
     if (_currentState == TranscriptionConnectionState.connected) return;
     _intentionalDisconnect = false;
@@ -59,7 +60,7 @@ class TranscriptionService {
         'type': 'start',
         'session_id': _sessionId,
         'user_id': _userId,
-        'mode': 'speaker',
+        'mode': mode,
         'language': language,
       });
 

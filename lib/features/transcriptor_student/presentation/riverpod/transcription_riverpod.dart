@@ -89,6 +89,7 @@ class StudentTranscriptionNotifier
     await _service!.connectAndStart(
       userId: user.userId.toString(),
       sessionId: _sessionIdForCourse(courseId),
+      mode: 'listener',
     );
   }
 
