@@ -26,7 +26,7 @@ class AppContainer {
   Future<void> init() async {
     await tokenStorage.getToken();
     apiClient = ApiClient(
-      baseUrl: 'http://18.211.105.70:8080/graphql',
+      baseUrl: 'https://sauu.store/graphql',
       tokenStorage: tokenStorage,
     );
   }
