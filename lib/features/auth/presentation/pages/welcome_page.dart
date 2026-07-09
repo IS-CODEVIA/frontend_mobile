@@ -11,25 +11,30 @@ class WelcomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: WelcomeBackground(
         child: SafeArea(
           bottom: false,
-          child: Stack(
-            children: [
-              const Align(
-                alignment: Alignment(-0.4, 0.16),
-                child: UpLogo(),
-              ),
-              Positioned(
-                bottom: 48,
-                right: 32,
-                child: ComenzarButton(
-                  onPressed: () => context.goNamed('login'),
+          child: LayoutBuilder(
+            builder: (context, constraints) => Stack(
+              children: [
+                Align(
+                  alignment: Alignment(screenWidth < 360 ? -0.3 : -0.4, 0.16),
+                  child: UpLogo(),
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: screenHeight * 0.06,
+                  right: screenWidth * 0.08,
+                  child: ComenzarButton(
+                    onPressed: () => context.goNamed('login'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

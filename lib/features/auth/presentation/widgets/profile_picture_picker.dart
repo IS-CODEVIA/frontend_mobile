@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
+
 class ProfilePicturePicker extends StatelessWidget {
   final VoidCallback onTap;
   final double size;
@@ -13,13 +15,20 @@ class ProfilePicturePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+    final avatarSize = responsiveValue<double>(
+      context,
+      mobile: isSmallScreen ? 80 : size,
+      tablet: 120,
+      desktop: 140,
+    );
 
     return Center(
       child: Stack(
         children: [
           Container(
-            width: size,
-            height: size,
+            width: avatarSize,
+            height: avatarSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: colorScheme.surfaceContainerHighest,
@@ -30,7 +39,7 @@ class ProfilePicturePicker extends StatelessWidget {
             ),
             child: Icon(
               Icons.person,
-              size: size * 0.5,
+              size: avatarSize * 0.5,
               color: colorScheme.outline,
             ),
           ),
@@ -40,7 +49,7 @@ class ProfilePicturePicker extends StatelessWidget {
             child: GestureDetector(
               onTap: onTap,
               child: Container(
-                padding: const EdgeInsets.all(6),
+                padding: EdgeInsets.all(isSmallScreen ? 4 : 6),
                 decoration: BoxDecoration(
                   color: colorScheme.primary,
                   shape: BoxShape.circle,
@@ -48,7 +57,7 @@ class ProfilePicturePicker extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.camera_alt,
-                  size: 16,
+                  size: isSmallScreen ? 14 : 16,
                   color: colorScheme.onPrimary,
                 ),
               ),

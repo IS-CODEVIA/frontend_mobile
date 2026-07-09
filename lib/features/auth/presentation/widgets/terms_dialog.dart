@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
+
 const String _privacyPolicyContent = '''
 AVISO DE PRIVACIDAD
 
 Responsable
 
-IS-CODEVIA, con domicilio en Suchiapa, Chiapas, Barrio San Francisco, es el responsable del uso y protección de sus datos personales, y al respecto le informamos lo siguiente.
+IS-CODESVIA, con domicilio en Suchiapa, Chiapas, capitales de San Francisco, es el responsable del uso y protección de sus datos de datos personales, y al respecto le informamos lo siguiente.
 
 Datos personales que recabamos
 
@@ -117,15 +119,24 @@ Para cualquier duda, comentario o ejercicio de sus derechos, puede contactarnos 
 void showTermsDialog(BuildContext context) {
   final colorScheme = Theme.of(context).colorScheme;
   final textTheme = Theme.of(context).textTheme;
+  final isSmallScreen = MediaQuery.of(context).size.width < 360;
 
   showDialog(
     context: context,
     builder: (context) => Dialog(
       backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 16 : 24,
+        vertical: 40,
+      ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        padding: EdgeInsets.fromLTRB(
+          isSmallScreen ? 16 : 24,
+          isSmallScreen ? 16 : 24,
+          isSmallScreen ? 16 : 24,
+          16,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,6 +149,7 @@ void showTermsDialog(BuildContext context) {
                     style: textTheme.titleLarge?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
+                      fontSize: responsiveFontSize(context, 22),
                     ),
                   ),
                 ),
@@ -148,7 +160,7 @@ void showTermsDialog(BuildContext context) {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isSmallScreen ? 12 : 16),
             Flexible(
               child: SingleChildScrollView(
                 child: Text(
@@ -156,11 +168,12 @@ void showTermsDialog(BuildContext context) {
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurface,
                     height: 1.5,
+                    fontSize: responsiveFontSize(context, 14),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isSmallScreen ? 12 : 16),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(

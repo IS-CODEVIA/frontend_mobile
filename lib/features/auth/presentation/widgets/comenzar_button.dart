@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
+
 class ComenzarButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -9,6 +11,7 @@ class ComenzarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
 
     return OutlinedButton(
       onPressed: onPressed,
@@ -17,12 +20,16 @@ class ComenzarButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 24 : 32,
+          vertical: isSmallScreen ? 10 : 14,
+        ),
       ),
       child: Text(
         'Comenzar',
         style: textTheme.labelLarge?.copyWith(
           color: colorScheme.onSecondary,
+          fontSize: responsiveFontSize(context, 14),
         ),
       ),
     );
