@@ -104,7 +104,8 @@ class _TranscriptorStudentPageState
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (_) => const ChatSheet(),
+                            builder: (_) =>
+                                ChatSheet(courseId: widget.courseId),
                           );
                         },
                       ),

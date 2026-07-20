@@ -56,7 +56,9 @@ class StudentNoticesNotifier
         courseId: StudentNoticesState(notices: notices),
       };
     } catch (e, st) {
-      debugPrint('loadNotices error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('loadNotices error: $e\n$st');
+      }
       state = {
         ...state,
         courseId: StudentNoticesState(error: e.toString()),

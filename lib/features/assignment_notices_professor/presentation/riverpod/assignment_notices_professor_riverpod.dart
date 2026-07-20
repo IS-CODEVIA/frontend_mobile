@@ -61,7 +61,9 @@ class ProfessorNoticesNotifier
         courseId: ProfessorNoticesState(notices: notices),
       };
     } catch (e, st) {
-      debugPrint('loadNotices error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('loadNotices error: $e\n$st');
+      }
       state = {
         ...state,
         courseId: ProfessorNoticesState(error: e.toString()),
@@ -87,7 +89,9 @@ class ProfessorNoticesNotifier
       };
       return notice;
     } catch (e, st) {
-      debugPrint('createNotice error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('createNotice error: $e\n$st');
+      }
       return null;
     }
   }

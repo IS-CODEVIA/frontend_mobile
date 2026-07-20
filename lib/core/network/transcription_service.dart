@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:uuid/uuid.dart';
 
@@ -50,7 +51,7 @@ class TranscriptionService {
 
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse('wss://e6omtu6oi9j7p7-8000.proxy.runpod.net/ws/transcribe'),
+        Uri.parse('ws://localhost:8000/ws/transcribe'),
       );
 
       await _channel!.ready;
@@ -117,8 +118,10 @@ class TranscriptionService {
   void sendAudioChunk(Uint8List chunk) {
     if (_channel != null &&
         _currentState == TranscriptionConnectionState.connected) {
-      print(
-          'sendAudioChunk: user_id=$_userId, session_id=$_sessionId, chunkSize=${chunk.length}');
+      if (kDebugMode) {
+        print(
+            'sendAudioChunk: user_id=$_userId, session_id=$_sessionId, chunkSize=${chunk.length}');
+      }
       _channel!.sink.add(chunk);
     }
   }
