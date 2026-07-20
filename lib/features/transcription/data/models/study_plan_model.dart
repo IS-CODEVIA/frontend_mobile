@@ -24,21 +24,26 @@ class FeedbackModel {
   factory FeedbackModel.fromJson(Map<String, dynamic> json) {
     return FeedbackModel(
       sessionId: json['session_id'] as String? ?? '',
-      summary: json['summary'] as String? ?? '',
-      keyTopics: (json['key_topics'] as List? ?? [])
+      summary: json['resumen'] as String? ?? '',
+      keyTopics: (json['ideas_clave'] as List? ?? [])
           .map((e) => e as String)
           .toList(),
-      strengths: (json['strengths'] as List? ?? [])
+      strengths: (json['conexiones'] as List? ?? [])
           .map((e) => e as String)
           .toList(),
-      areasToImprove: (json['areas_to_improve'] as List? ?? [])
+      areasToImprove: (json['temas_confusos'] as List? ?? [])
+          .map((e) {
+            final tema = (e as Map<String, dynamic>)['tema'] as String? ?? '';
+            final explicacion =
+                (e)['explicacion'] as String? ?? '';
+            return '$tema: $explicacion';
+          })
+          .toList(),
+      recommendations: (json['recomendaciones'] as List? ?? [])
           .map((e) => e as String)
           .toList(),
-      recommendations: (json['recommendations'] as List? ?? [])
-          .map((e) => e as String)
-          .toList(),
-      engagementEstimate: (json['engagement_estimate'] as num?)?.toDouble() ?? 0.0,
-      suggestedReview: json['suggested_review'] as String? ?? '',
+      engagementEstimate: 0.0,
+      suggestedReview: '',
     );
   }
 

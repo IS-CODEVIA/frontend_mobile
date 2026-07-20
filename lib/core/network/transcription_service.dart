@@ -51,7 +51,7 @@ class TranscriptionService {
 
     try {
       _channel = WebSocketChannel.connect(
-        Uri.parse('ws://localhost:8000/ws/transcribe'),
+        Uri.parse('wss://k9zflqh4afa4ll-8000.proxy.runpod.net/ws/transcribe'),
       );
 
       await _channel!.ready;

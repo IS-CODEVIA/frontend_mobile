@@ -35,6 +35,33 @@ class _TranscriptionDetailStudentPageState
   bool _isLoadingFeedback = false;
   String? _feedbackError;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingFeedback());
+  }
+
+  Future<void> _loadExistingFeedback() async {
+    final dataSource = FeedbackRemoteDataSource();
+    try {
+      final plan = await dataSource.getFeedback(
+        sessionId: 'session-${widget.transcription.transcriptionId}',
+      );
+      if (mounted) {
+        setState(() {
+          _studyPlan = plan;
+        });
+      }
+    } on Exception catch (e) {
+      if (e.toString().contains('FEEDBACK_NOT_FOUND')) return;
+      if (mounted) {
+        setState(() {
+          _feedbackError = e.toString();
+        });
+      }
+    }
+  }
+
   void _downloadTranscription(BuildContext context) {
     final title = widget.transcription.classTopic.isNotEmpty
         ? widget.transcription.classTopic
