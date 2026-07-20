@@ -81,7 +81,9 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
           .toList();
       state = state.copyWith(subjects: subjects);
     } catch (e, st) {
-      debugPrint('loadEnrollments error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('loadEnrollments error: $e\n$st');
+      }
       state = state.copyWith(
         error: e.toString(),
       );
@@ -96,7 +98,9 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
       loadEnrollments();
       return result;
     } catch (e, st) {
-      debugPrint('joinCourse error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('joinCourse error: $e\n$st');
+      }
       state = state.copyWith(isJoining: false, joinError: e.toString());
       return null;
     }

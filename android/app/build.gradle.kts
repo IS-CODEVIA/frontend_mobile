@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.codevia.sauu_mobile"
-        minSdk = flutter.minSdkVersion
+        minSdk = 29
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

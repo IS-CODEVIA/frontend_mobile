@@ -59,7 +59,9 @@ class ProfessorPeopleNotifier
         courseId: ProfessorPeopleState(people: people),
       };
     } catch (e, st) {
-      debugPrint('loadPeople error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('loadPeople error: $e\n$st');
+      }
       state = {
         ...state,
         courseId: const ProfessorPeopleState(),

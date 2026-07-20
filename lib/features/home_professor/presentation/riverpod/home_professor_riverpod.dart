@@ -36,7 +36,9 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
       final courses = await ref.read(_getCoursesUsecaseProvider)();
       state = courses;
     } catch (e, st) {
-      debugPrint('_loadCourses error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('_loadCourses error: $e\n$st');
+      }
     }
   }
 
@@ -56,7 +58,9 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
       state = [...state, course];
       return course;
     } catch (e, st) {
-      debugPrint('createCourse error: $e\n$st');
+      if (kDebugMode) {
+        debugPrint('createCourse error: $e\n$st');
+      }
       return null;
     }
   }

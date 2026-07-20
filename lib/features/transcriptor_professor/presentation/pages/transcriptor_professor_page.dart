@@ -116,7 +116,7 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (_) => const ChatSheet(),
+                            builder: (_) => ChatSheet(courseId: courseId),
                           );
                         },
                       ),
