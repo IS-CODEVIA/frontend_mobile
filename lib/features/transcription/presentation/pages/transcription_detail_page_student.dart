@@ -41,11 +41,13 @@ class _TranscriptionDetailStudentPageState
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingFeedback());
   }
 
+  String get _sessionId => 'live:${widget.courseId}';
+
   Future<void> _loadExistingFeedback() async {
     final dataSource = FeedbackRemoteDataSource();
     try {
       final plan = await dataSource.getFeedback(
-        sessionId: 'session-${widget.transcription.transcriptionId}',
+        sessionId: _sessionId,
       );
       if (mounted) {
         setState(() {
@@ -110,7 +112,7 @@ class _TranscriptionDetailStudentPageState
     try {
       final dataSource = FeedbackRemoteDataSource();
       final plan = await dataSource.generateFeedback(
-        sessionId: 'session-${widget.transcription.transcriptionId}',
+        sessionId: _sessionId,
         userId: user.userId,
       );
       setState(() {

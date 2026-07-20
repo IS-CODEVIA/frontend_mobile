@@ -83,7 +83,7 @@ class _TranscriptionDetailProfessorPageState
     try {
       final dataSource = FeedbackRemoteDataSource();
       final plan = await dataSource.generateFeedback(
-        sessionId: 'session-${widget.transcription.transcriptionId}',
+        sessionId: 'live:${widget.courseId}',
         userId: user.userId,
       );
       setState(() {
