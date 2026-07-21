@@ -34,6 +34,7 @@ class StudentMaterialsNotifier
       final materials = await ref.read(_getMaterialsUsecaseProvider)(
         courseId: courseId,
       );
+      materials.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       state = {...state, courseId: materials};
     } catch (_) {}
   }

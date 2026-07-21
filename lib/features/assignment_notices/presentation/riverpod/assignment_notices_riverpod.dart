@@ -51,6 +51,7 @@ class StudentNoticesNotifier
       final notices = await ref.read(_getNoticesUsecaseProvider)(
         courseId: courseId,
       );
+      notices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       state = {
         ...state,
         courseId: StudentNoticesState(notices: notices),
