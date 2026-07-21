@@ -66,6 +66,40 @@ class ApiClient {
     return data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> uploadFile({
+    required String path,
+    required String fieldName,
+    required List<int> fileBytes,
+    required String fileName,
+  }) async {
+    final uri = Uri.parse('${Uri.parse(baseUrl).origin}$path');
+    final request = http.MultipartRequest('POST', uri);
+
+    final token = await tokenStorage.getToken();
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        fieldName,
+        fileBytes,
+        filename: fileName,
+      ),
+    );
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    if (response.statusCode != 200) {
+      final msg = _tryExtractErrorMessage(response.body)
+          ?? 'Error HTTP ${response.statusCode}';
+      throw ApiException(msg);
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   String? _tryExtractErrorMessage(String body) {
     try {
       final decoded = jsonDecode(body) as Map<String, dynamic>;
