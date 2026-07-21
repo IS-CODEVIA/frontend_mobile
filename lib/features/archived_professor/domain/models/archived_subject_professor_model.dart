@@ -1,12 +1,14 @@
 import '../../../home_professor/domain/entities/course_entity.dart';
 
 class ArchivedSubjectProfessorModel {
+  final int subjectId;
   final int courseId;
   final String title;
   final String subtitle;
   final int colorSeed;
 
   const ArchivedSubjectProfessorModel({
+    required this.subjectId,
     required this.courseId,
     required this.title,
     required this.subtitle,
@@ -15,6 +17,7 @@ class ArchivedSubjectProfessorModel {
 
   factory ArchivedSubjectProfessorModel.fromCourse(CourseEntity course, int colorSeed) {
     return ArchivedSubjectProfessorModel(
+      subjectId: course.subjectId,
       courseId: course.courseId,
       title: course.courseName,
       subtitle: course.section,

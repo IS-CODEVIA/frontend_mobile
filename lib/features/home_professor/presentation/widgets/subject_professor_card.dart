@@ -38,13 +38,13 @@ class SubjectProfessorCard extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success = await ref.read(professorSubjectsProvider.notifier).archiveClass(course.courseId);
+      final success = await ref.read(professorSubjectsProvider.notifier).archiveCourse(course.courseId);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(success
-                ? 'Clase archivada correctamente'
-                : 'Error al archivar la clase'),
+                ? 'Clases archivadas correctamente'
+                : 'Error al archivar las clases'),
           ),
         );
       }

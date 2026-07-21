@@ -2,12 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
+import '../../data/datasources/course_remote_datasource.dart';
 import '../../di/home_professor_di.dart';
 import '../../domain/entities/course_entity.dart';
-import '../../domain/usecases/archive_class_usecase.dart';
 import '../../domain/usecases/create_course_usecase.dart';
 import '../../domain/usecases/get_courses_usecase.dart';
-import '../../domain/usecases/unarchive_class_usecase.dart';
 
 final _homeProfessorDIProvider = Provider<HomeProfessorDI>((ref) {
   return HomeProfessorDI(ref.watch(appContainerProvider)!);
@@ -21,12 +20,8 @@ final _createCourseUsecaseProvider = Provider<CreateCourseUsecase>((ref) {
   return ref.watch(_homeProfessorDIProvider).createCourseUsecase;
 });
 
-final _archiveClassUsecaseProvider = Provider<ArchiveClassUsecase>((ref) {
-  return ref.watch(_homeProfessorDIProvider).archiveClassUsecase;
-});
-
-final _unarchiveClassUsecaseProvider = Provider<UnarchiveClassUsecase>((ref) {
-  return ref.watch(_homeProfessorDIProvider).unarchiveClassUsecase;
+final _courseRemoteDataSourceProvider = Provider<CourseRemoteDataSource>((ref) {
+  return ref.watch(_homeProfessorDIProvider).courseRemoteDataSource;
 });
 
 final professorSubjectsProvider =
@@ -79,27 +74,39 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
     }
   }
 
-  Future<bool> archiveClass(int classId) async {
+  Future<bool> archiveCourse(int courseId) async {
     try {
-      await ref.read(_archiveClassUsecaseProvider)(classId);
-      ref.read(archivedCourseIdsProvider.notifier).add(classId);
+      final ds = ref.read(_courseRemoteDataSourceProvider);
+      final classes = await ds.getClasses(courseId);
+      for (final c in classes) {
+        if (!c.archived) {
+          await ds.archiveClass(c.classId);
+        }
+      }
+      ref.read(archivedCourseIdsProvider.notifier).add(courseId);
       return true;
     } catch (e, st) {
       if (kDebugMode) {
-        debugPrint('archiveClass error: $e\n$st');
+        debugPrint('archiveCourse error: $e\n$st');
       }
       return false;
     }
   }
 
-  Future<bool> unarchiveClass(int classId) async {
+  Future<bool> unarchiveCourse(int courseId) async {
     try {
-      await ref.read(_unarchiveClassUsecaseProvider)(classId);
-      ref.read(archivedCourseIdsProvider.notifier).remove(classId);
+      final ds = ref.read(_courseRemoteDataSourceProvider);
+      final classes = await ds.getClasses(courseId);
+      for (final c in classes) {
+        if (c.archived) {
+          await ds.unarchiveClass(c.classId);
+        }
+      }
+      ref.read(archivedCourseIdsProvider.notifier).remove(courseId);
       return true;
     } catch (e, st) {
       if (kDebugMode) {
-        debugPrint('unarchiveClass error: $e\n$st');
+        debugPrint('unarchiveCourse error: $e\n$st');
       }
       return false;
     }

@@ -33,13 +33,13 @@ class ArchivedSubjectProfessorCard extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success = await ref.read(professorSubjectsProvider.notifier).unarchiveClass(subject.courseId);
+      final success = await ref.read(professorSubjectsProvider.notifier).unarchiveCourse(subject.courseId);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(success
-                ? 'Clase restaurada correctamente'
-                : 'Error al restaurar la clase'),
+                ? 'Clases restauradas correctamente'
+                : 'Error al restaurar las clases'),
           ),
         );
       }

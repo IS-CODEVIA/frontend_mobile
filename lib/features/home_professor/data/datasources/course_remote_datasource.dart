@@ -1,16 +1,22 @@
 import '../../../../core/network/api_client.dart';
 import '../models/course_model.dart';
 
-class SubjectData {
-  final int subjectId;
-  final String subjectName;
+class ClassData {
+  final int classId;
+  final int courseId;
+  final bool archived;
 
-  const SubjectData({required this.subjectId, required this.subjectName});
+  const ClassData({
+    required this.classId,
+    required this.courseId,
+    required this.archived,
+  });
 
-  factory SubjectData.fromJson(Map<String, dynamic> json) {
-    return SubjectData(
-      subjectId: json['subjectID'] as int,
-      subjectName: json['subjectName'] as String,
+  factory ClassData.fromJson(Map<String, dynamic> json) {
+    return ClassData(
+      classId: json['classID'] as int,
+      courseId: json['courseID'] as int,
+      archived: json['archived'] as bool? ?? false,
     );
   }
 }
@@ -20,45 +26,25 @@ class CourseRemoteDataSource {
 
   const CourseRemoteDataSource({required this.apiClient});
 
-  Future<List<SubjectData>> getSubjects() async {
+  Future<List<ClassData>> getClasses(int courseId) async {
     const query = '''
-      query {
-        subjects {
-          subjectID
-          subjectName
-        }
-      }
-    ''';
-
-    final data = await apiClient.request(query: query);
-    final list = data['subjects'] as List;
-    return list.map((e) => SubjectData.fromJson(e as Map<String, dynamic>)).toList();
-  }
-
-  Future<List<CourseModel>> getCourses() async {
-    const query = '''
-      query {
-        courses {
+      query(\$courseID: Int!) {
+        classes(courseID: \$courseID) {
+          classID
           courseID
-          courseName
-          section
-          period
-          joinCode
-          subjectID
-          teacherID
-          createdAt
-          updatedAt
+          archived
         }
       }
     ''';
 
     final data = await apiClient.request(
       query: query,
+      variables: {'courseID': courseId},
       requiresAuth: true,
     );
 
-    final list = data['courses'] as List;
-    return list.map((e) => CourseModel.fromJson(e as Map<String, dynamic>)).toList();
+    final list = data['classes'] as List;
+    return list.map((e) => ClassData.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<void> archiveClass(int classId) async {
@@ -93,6 +79,32 @@ class CourseRemoteDataSource {
       variables: {'classID': classId},
       requiresAuth: true,
     );
+  }
+
+  Future<List<CourseModel>> getCourses() async {
+    const query = '''
+      query {
+        courses {
+          courseID
+          courseName
+          section
+          period
+          joinCode
+          subjectID
+          teacherID
+          createdAt
+          updatedAt
+        }
+      }
+    ''';
+
+    final data = await apiClient.request(
+      query: query,
+      requiresAuth: true,
+    );
+
+    final list = data['courses'] as List;
+    return list.map((e) => CourseModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<CourseModel> createCourse({
