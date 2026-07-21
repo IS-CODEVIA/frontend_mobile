@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class HeaderStudents extends StatelessWidget {
+import '../../features/auth/presentation/riverpod/auth_riverpod.dart';
+
+class HeaderStudents extends ConsumerWidget {
   const HeaderStudents({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final avatarUrl = ref.watch(authViewModelProvider).user?.avatarUrl;
 
     return CustomPaint(
       painter: _HeaderPainter(
@@ -42,19 +47,27 @@ class HeaderStudents extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: colorScheme.onPrimary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.person,
-                      size: 30,
-                      color: colorScheme.outline,
+                GestureDetector(
+                  onTap: () => context.goNamed('profile'),
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: colorScheme.onPrimary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
+                      backgroundImage: avatarUrl != null
+                          ? NetworkImage(avatarUrl)
+                          : null,
+                      child: avatarUrl == null
+                          ? Icon(
+                              Icons.person,
+                              size: 30,
+                              color: colorScheme.outline,
+                            )
+                          : null,
                     ),
                   ),
                 ),
