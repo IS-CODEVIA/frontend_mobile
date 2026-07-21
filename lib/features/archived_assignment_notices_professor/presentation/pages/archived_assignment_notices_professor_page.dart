@@ -8,7 +8,7 @@ import '../../../../shared/widgets_professor/archived_professor_subject_bottom_n
 import '../../../../features/assignment_notices_professor/presentation/riverpod/assignment_notices_professor_riverpod.dart';
 import '../../../../features/assignment_notices_professor/presentation/widgets/assignment_notice_professor_card.dart';
 
-class ArchivedAssignmentNoticesProfessorPage extends ConsumerWidget {
+class ArchivedAssignmentNoticesProfessorPage extends ConsumerStatefulWidget {
   final String subjectName;
   final int courseId;
 
@@ -19,15 +19,34 @@ class ArchivedAssignmentNoticesProfessorPage extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ArchivedAssignmentNoticesProfessorPage> createState() =>
+      _ArchivedAssignmentNoticesProfessorPageState();
+}
+
+class _ArchivedAssignmentNoticesProfessorPageState
+    extends ConsumerState<ArchivedAssignmentNoticesProfessorPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref
+          .read(professorNoticesProvider.notifier)
+          .loadNotices(widget.courseId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final state = ref.watch(professorNoticesForCourseProvider(courseId));
+    final state =
+        ref.watch(professorNoticesForCourseProvider(widget.courseId));
 
     return Scaffold(
       drawer: const NavbarProfessors(),
-      bottomNavigationBar: ArchivedProfessorSubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar:
+          ArchivedProfessorSubjectBottomNav(subjectName: widget.subjectName),
       body: Column(
         children: [
           const HeaderProfessors(),
@@ -39,7 +58,7 @@ class ArchivedAssignmentNoticesProfessorPage extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    subjectName,
+                    widget.subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
@@ -65,13 +84,16 @@ class ArchivedAssignmentNoticesProfessorPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(top: 8, bottom: 24),
-                      itemCount: state.notices.length,
-                      itemBuilder: (context, index) {
-                        return AssignmentNoticeProfessorCard(notice: state.notices[index]);
-                      },
-                    ),
+                    child: state.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(top: 8, bottom: 24),
+                            itemCount: state.notices.length,
+                            itemBuilder: (context, index) {
+                              return AssignmentNoticeProfessorCard(
+                                  notice: state.notices[index]);
+                            },
+                          ),
                   ),
                 ],
               ),

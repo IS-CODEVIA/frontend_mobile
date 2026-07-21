@@ -11,8 +11,13 @@ import '../../../../features/people_student/presentation/widgets/role_section.da
 
 class ArchivedPeopleStudentPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const ArchivedPeopleStudentPage({super.key, required this.subjectName});
+  const ArchivedPeopleStudentPage({
+    super.key,
+    required this.subjectName,
+    this.courseId = 0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

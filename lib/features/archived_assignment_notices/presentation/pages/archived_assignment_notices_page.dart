@@ -8,21 +8,41 @@ import '../../../../shared/widgets/archived_subject_bottom_nav.dart';
 import '../../../../features/assignment_notices/presentation/riverpod/assignment_notices_riverpod.dart';
 import '../../../../features/assignment_notices/presentation/widgets/assignment_notice_card.dart';
 
-class ArchivedAssignmentNoticesPage extends ConsumerWidget {
+class ArchivedAssignmentNoticesPage extends ConsumerStatefulWidget {
   final String subjectName;
+  final int courseId;
 
-  const ArchivedAssignmentNoticesPage({super.key, required this.subjectName});
+  const ArchivedAssignmentNoticesPage({
+    super.key,
+    required this.subjectName,
+    this.courseId = 0,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ArchivedAssignmentNoticesPage> createState() =>
+      _ArchivedAssignmentNoticesPageState();
+}
+
+class _ArchivedAssignmentNoticesPageState
+    extends ConsumerState<ArchivedAssignmentNoticesPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.courseId > 0) {
+      ref.read(studentNoticesProvider.notifier).loadNotices(widget.courseId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final state = ref.watch(studentNoticesForCourseProvider(0));
+    final state = ref.watch(studentNoticesForCourseProvider(widget.courseId));
 
     return Scaffold(
       drawer: const NavbarStudents(),
-      bottomNavigationBar: ArchivedSubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: ArchivedSubjectBottomNav(subjectName: widget.subjectName),
       body: Column(
         children: [
           const HeaderStudents(),
@@ -34,7 +54,7 @@ class ArchivedAssignmentNoticesPage extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    subjectName,
+                    widget.subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,

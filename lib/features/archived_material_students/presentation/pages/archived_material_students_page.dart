@@ -7,8 +7,9 @@ import '../../../../shared/widgets/archived_subject_bottom_nav.dart';
 
 import '../../../../features/material_students/presentation/widgets/unit_material_section.dart';
 import '../../../../features/material_students/domain/models/material_model.dart';
+import '../../../../features/material_students/presentation/riverpod/materials_riverpod.dart';
 
-class ArchivedMaterialStudentsPage extends ConsumerWidget {
+class ArchivedMaterialStudentsPage extends ConsumerStatefulWidget {
   final String subjectName;
   final int courseId;
 
@@ -19,15 +20,31 @@ class ArchivedMaterialStudentsPage extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+  ConsumerState<ArchivedMaterialStudentsPage> createState() =>
+      _ArchivedMaterialStudentsPageState();
+}
 
+class _ArchivedMaterialStudentsPageState
+    extends ConsumerState<ArchivedMaterialStudentsPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.courseId > 0) {
+      ref.read(studentMaterialsProvider.notifier).loadMaterials(widget.courseId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textScheme = Theme.of(context).textTheme;
+
+    final materials = ref.watch(studentMaterialsForCourseProvider(widget.courseId));
     final unitsData = <UnitMaterialsModel>[];
 
     return Scaffold(
       drawer: const NavbarStudents(), 
-      bottomNavigationBar: ArchivedSubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar: ArchivedSubjectBottomNav(subjectName: widget.subjectName),
       body: Column(
         children: [
           const HeaderStudents(),
@@ -39,8 +56,8 @@ class ArchivedMaterialStudentsPage extends ConsumerWidget {
                 const SizedBox(height: 16),
                 
                 Text(
-                  subjectName,
-                  style: textTheme.headlineMedium?.copyWith(
+                  widget.subjectName,
+                  style: textScheme.headlineMedium?.copyWith(
                     color: colorScheme.secondary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -48,8 +65,8 @@ class ArchivedMaterialStudentsPage extends ConsumerWidget {
                 
                 ...unitsData.map((unit) => UnitMaterialSection(
                   unitModel: unit,
-                  subjectName: subjectName,
-                  courseId: courseId,
+                  subjectName: widget.subjectName,
+                  courseId: widget.courseId,
                 )),
                 
                 const SizedBox(height: 40),

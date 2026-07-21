@@ -125,3 +125,9 @@ class ArchivedCourseIdsNotifier extends Notifier<Set<int>> {
     state = {...state}..remove(id);
   }
 }
+
+final activeProfessorSubjectsProvider = Provider<List<CourseEntity>>((ref) {
+  final courses = ref.watch(professorSubjectsProvider);
+  final archivedIds = ref.watch(archivedCourseIdsProvider);
+  return courses.where((c) => !archivedIds.contains(c.courseId)).toList();
+});

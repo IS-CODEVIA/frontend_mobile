@@ -19,6 +19,7 @@ class ArchivedSubjectCard extends StatelessWidget {
       onTap: () => context.goNamed(
         'archived-assignment-notices',
         pathParameters: {'subjectName': subject.title},
+        extra: {'courseId': subject.courseId},
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16.0),
