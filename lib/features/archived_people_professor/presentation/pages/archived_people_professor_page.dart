@@ -11,15 +11,20 @@ import '../../../../features/people_professor/presentation/widgets/role_section.
 
 class ArchivedPeopleProfessorPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const ArchivedPeopleProfessorPage({super.key, required this.subjectName});
+  const ArchivedPeopleProfessorPage({
+    super.key,
+    required this.subjectName,
+    this.courseId = 0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final state = ref.watch(professorPeopleForCourseProvider(0));
+    final state = ref.watch(professorPeopleForCourseProvider(courseId));
 
     final teachers = state.people.where((p) => p.role == ClassRole.teacher).toList();
     final students = state.people.where((p) => p.role == ClassRole.student).toList();

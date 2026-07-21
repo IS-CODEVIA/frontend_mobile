@@ -14,6 +14,16 @@ class CourseRepositoryImpl implements CourseRepository {
   }
 
   @override
+  Future<void> archiveClass(int classId) async {
+    await remoteDataSource.archiveClass(classId);
+  }
+
+  @override
+  Future<void> unarchiveClass(int classId) async {
+    await remoteDataSource.unarchiveClass(classId);
+  }
+
+  @override
   Future<CourseEntity> createCourse({
     required String courseName,
     required String section,

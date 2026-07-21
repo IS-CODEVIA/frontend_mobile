@@ -10,15 +10,20 @@ import '../../../../features/assignment_notices_professor/presentation/widgets/a
 
 class ArchivedAssignmentNoticesProfessorPage extends ConsumerWidget {
   final String subjectName;
+  final int courseId;
 
-  const ArchivedAssignmentNoticesProfessorPage({super.key, required this.subjectName});
+  const ArchivedAssignmentNoticesProfessorPage({
+    super.key,
+    required this.subjectName,
+    this.courseId = 0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final state = ref.watch(professorNoticesForCourseProvider(0));
+    final state = ref.watch(professorNoticesForCourseProvider(courseId));
 
     return Scaffold(
       drawer: const NavbarProfessors(),

@@ -8,4 +8,6 @@ abstract class CourseRepository {
     required String period,
     required int subjectId,
   });
+  Future<void> archiveClass(int classId);
+  Future<void> unarchiveClass(int classId);
 }

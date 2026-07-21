@@ -61,6 +61,40 @@ class CourseRemoteDataSource {
     return list.map((e) => CourseModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<void> archiveClass(int classId) async {
+    const query = '''
+      mutation(\$classID: Int!) {
+        archiveClass(classID: \$classID) {
+          classID
+          archived
+        }
+      }
+    ''';
+
+    await apiClient.request(
+      query: query,
+      variables: {'classID': classId},
+      requiresAuth: true,
+    );
+  }
+
+  Future<void> unarchiveClass(int classId) async {
+    const query = '''
+      mutation(\$classID: Int!) {
+        unarchiveClass(classID: \$classID) {
+          classID
+          archived
+        }
+      }
+    ''';
+
+    await apiClient.request(
+      query: query,
+      variables: {'classID': classId},
+      requiresAuth: true,
+    );
+  }
+
   Future<CourseModel> createCourse({
     required String courseName,
     required String section,

@@ -1,15 +1,24 @@
+import '../../../home_professor/domain/entities/course_entity.dart';
+
 class ArchivedSubjectProfessorModel {
-  final String id;
+  final int courseId;
   final String title;
   final String subtitle;
-  final String teacherName;
   final int colorSeed;
 
   const ArchivedSubjectProfessorModel({
-    required this.id,
+    required this.courseId,
     required this.title,
     required this.subtitle,
-    required this.teacherName,
     this.colorSeed = 0,
   });
+
+  factory ArchivedSubjectProfessorModel.fromCourse(CourseEntity course, int colorSeed) {
+    return ArchivedSubjectProfessorModel(
+      courseId: course.courseId,
+      title: course.courseName,
+      subtitle: course.section,
+      colorSeed: colorSeed,
+    );
+  }
 }

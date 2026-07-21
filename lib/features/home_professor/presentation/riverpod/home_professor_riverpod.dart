@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/app_container.dart';
 import '../../di/home_professor_di.dart';
 import '../../domain/entities/course_entity.dart';
+import '../../domain/usecases/archive_class_usecase.dart';
 import '../../domain/usecases/create_course_usecase.dart';
 import '../../domain/usecases/get_courses_usecase.dart';
+import '../../domain/usecases/unarchive_class_usecase.dart';
 
 final _homeProfessorDIProvider = Provider<HomeProfessorDI>((ref) {
   return HomeProfessorDI(ref.watch(appContainerProvider)!);
@@ -19,9 +21,21 @@ final _createCourseUsecaseProvider = Provider<CreateCourseUsecase>((ref) {
   return ref.watch(_homeProfessorDIProvider).createCourseUsecase;
 });
 
+final _archiveClassUsecaseProvider = Provider<ArchiveClassUsecase>((ref) {
+  return ref.watch(_homeProfessorDIProvider).archiveClassUsecase;
+});
+
+final _unarchiveClassUsecaseProvider = Provider<UnarchiveClassUsecase>((ref) {
+  return ref.watch(_homeProfessorDIProvider).unarchiveClassUsecase;
+});
+
 final professorSubjectsProvider =
     NotifierProvider<ProfessorSubjectsNotifier, List<CourseEntity>>(
   ProfessorSubjectsNotifier.new,
+);
+
+final archivedCourseIdsProvider = NotifierProvider<ArchivedCourseIdsNotifier, Set<int>>(
+  ArchivedCourseIdsNotifier.new,
 );
 
 class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
@@ -63,5 +77,44 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
       }
       return null;
     }
+  }
+
+  Future<bool> archiveClass(int classId) async {
+    try {
+      await ref.read(_archiveClassUsecaseProvider)(classId);
+      ref.read(archivedCourseIdsProvider.notifier).add(classId);
+      return true;
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('archiveClass error: $e\n$st');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> unarchiveClass(int classId) async {
+    try {
+      await ref.read(_unarchiveClassUsecaseProvider)(classId);
+      ref.read(archivedCourseIdsProvider.notifier).remove(classId);
+      return true;
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('unarchiveClass error: $e\n$st');
+      }
+      return false;
+    }
+  }
+}
+
+class ArchivedCourseIdsNotifier extends Notifier<Set<int>> {
+  @override
+  Set<int> build() => {};
+
+  void add(int id) {
+    state = {...state, id};
+  }
+
+  void remove(int id) {
+    state = {...state}..remove(id);
   }
 }
