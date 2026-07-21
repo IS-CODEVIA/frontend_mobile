@@ -46,7 +46,10 @@ class _ArchivedAssignmentNoticesProfessorPageState
     return Scaffold(
       drawer: const NavbarProfessors(),
       bottomNavigationBar:
-          ArchivedProfessorSubjectBottomNav(subjectName: widget.subjectName),
+          ArchivedProfessorSubjectBottomNav(
+            subjectName: widget.subjectName,
+            courseId: widget.courseId,
+          ),
       body: Column(
         children: [
           const HeaderProfessors(),
@@ -86,14 +89,76 @@ class _ArchivedAssignmentNoticesProfessorPageState
                   Expanded(
                     child: state.isLoading
                         ? const Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(top: 8, bottom: 24),
-                            itemCount: state.notices.length,
-                            itemBuilder: (context, index) {
-                              return AssignmentNoticeProfessorCard(
-                                  notice: state.notices[index]);
-                            },
-                          ),
+                        : state.error != null
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.error_outline,
+                                          size: 48,
+                                          color: colorScheme.error),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        state.error!,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.error,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextButton(
+                                        onPressed: () {
+                                          ref
+                                              .read(professorNoticesProvider
+                                                  .notifier)
+                                              .loadNotices(widget.courseId);
+                                        },
+                                        child: const Text('Reintentar'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : state.notices.isEmpty
+                                ? Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                            Icons.notifications_off_outlined,
+                                            size: 48,
+                                            color: colorScheme
+                                                .onSurfaceVariant),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'No hay avisos',
+                                          style: textTheme.bodyLarge
+                                              ?.copyWith(
+                                            color: colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : RefreshIndicator(
+                                    onRefresh: () => ref
+                                        .read(professorNoticesProvider
+                                            .notifier)
+                                        .loadNotices(widget.courseId),
+                                    child: ListView.builder(
+                                      padding: const EdgeInsets.only(
+                                          top: 8, bottom: 24),
+                                      itemCount: state.notices.length,
+                                      itemBuilder: (context, index) {
+                                        return AssignmentNoticeProfessorCard(
+                                            notice:
+                                                state.notices[index]);
+                                      },
+                                    ),
+                                  ),
                   ),
                 ],
               ),
