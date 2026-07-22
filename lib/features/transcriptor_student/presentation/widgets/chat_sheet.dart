@@ -17,6 +17,7 @@ class ChatSheet extends ConsumerStatefulWidget {
 
 class _ChatSheetState extends ConsumerState<ChatSheet> {
   final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   late final ChatNotifier _chat;
   Timer? _typingTimer;
   bool _isTyping = false;
@@ -49,7 +50,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
   }
 
   void _sendMessage(String text) {
-    if (text.trim().isEmpty) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     _typingTimer?.cancel();
     if (_isTyping) {
       _isTyping = false;
@@ -57,6 +58,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     }
     _chat.sendMessage(text);
     _controller.clear();
+    _formKey.currentState?.reset();
   }
 
   @override
@@ -189,39 +191,51 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        textInputAction: TextInputAction.send,
-                        maxLength: 2000,
-                        decoration: InputDecoration(
-                          hintText: 'Escribe un mensaje...',
-                          counterText: '',
-                          filled: true,
-                          fillColor: colorScheme.surfaceContainerHighest,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
+                child: Form(
+                  key: _formKey,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _controller,
+                          textInputAction: TextInputAction.send,
+                          maxLength: 2000,
+                          decoration: InputDecoration(
+                            hintText: 'Escribe un mensaje...',
+                            counterText: '',
+                            filled: true,
+                            fillColor: colorScheme.surfaceContainerHighest,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                          onChanged: _onTextChanged,
+                          onFieldSubmitted: _sendMessage,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return '';
+                            }
+                            if (value.trim().length > 2000) {
+                              return 'Máximo 2000 caracteres';
+                            }
+                            return null;
+                          },
                         ),
-                        onChanged: _onTextChanged,
-                        onSubmitted: _sendMessage,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.filled(
-                      onPressed: () => _sendMessage(_controller.text),
-                      icon: const Icon(Icons.send_rounded),
-                      style: IconButton.styleFrom(
-                        backgroundColor: colorScheme.secondary,
-                        foregroundColor: colorScheme.onSecondary,
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        onPressed: () => _sendMessage(_controller.text),
+                        icon: const Icon(Icons.send_rounded),
+                        style: IconButton.styleFrom(
+                          backgroundColor: colorScheme.secondary,
+                          foregroundColor: colorScheme.onSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

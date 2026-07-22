@@ -114,6 +114,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Requerido';
                                 }
+                                if (value.trim().length < 2) {
+                                  return 'Mínimo 2 caracteres';
+                                }
+                                if (value.trim().length > 50) {
+                                  return 'Máximo 50 caracteres';
+                                }
+                                if (RegExp(r'[0-9]').hasMatch(value)) {
+                                  return 'No debe contener números';
+                                }
                                 return null;
                               },
                             ),
@@ -127,6 +136,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Requerido';
+                                }
+                                if (value.trim().length < 2) {
+                                  return 'Mínimo 2 caracteres';
+                                }
+                                if (value.trim().length > 50) {
+                                  return 'Máximo 50 caracteres';
+                                }
+                                if (RegExp(r'[0-9]').hasMatch(value)) {
+                                  return 'No debe contener números';
                                 }
                                 return null;
                               },
@@ -142,6 +160,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Ingresa tu correo';
+                          }
+                          if (value.trim().length > 254) {
+                            return 'Correo demasiado largo';
                           }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
                               .hasMatch(value.trim())) {
@@ -162,6 +183,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           }
                           if (value.trim().length < 6) {
                             return 'Mínimo 6 caracteres';
+                          }
+                          if (value.trim().length > 100) {
+                            return 'Máximo 100 caracteres';
                           }
                           return null;
                         },

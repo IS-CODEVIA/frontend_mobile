@@ -200,7 +200,15 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) return 'Requerido';
+            if (keyboardType == TextInputType.number) {
+              if (int.tryParse(v.trim()) == null || int.parse(v.trim()) <= 0) {
+                return 'Debe ser un número positivo';
+              }
+            }
+            return null;
+          },
           style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: hint,

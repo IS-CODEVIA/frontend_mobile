@@ -355,8 +355,12 @@ class _SaveTranscriptionSheetState
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          validator: (v) =>
-              v == null || v.trim().isEmpty ? 'Requerido' : null,
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) return 'Requerido';
+            if (v.trim().length < 5) return 'Mínimo 5 caracteres';
+            if (v.trim().length > 200) return 'Máximo 200 caracteres';
+            return null;
+          },
           style:
               textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
           decoration: InputDecoration(

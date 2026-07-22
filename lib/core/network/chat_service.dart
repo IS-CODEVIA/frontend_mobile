@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 
-const String kChatServerHost = 'http://34.193.116.225';
+const String kChatServerHost = 'https://sauuchat.shop';
 
 const String kChatRestUrl = '$kChatServerHost:3000';
 const String kChatSocketUrl = '$kChatServerHost:3001';

@@ -19,6 +19,7 @@ class ChatSheet extends ConsumerStatefulWidget {
 
 class _ChatSheetState extends ConsumerState<ChatSheet> {
   final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   late final ProfessorChatNotifier _chat;
   Timer? _typingTimer;
   bool _isTyping = false;
@@ -56,7 +57,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
   }
 
   void _sendMessage(String text) {
-    if (text.trim().isEmpty) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     _typingTimer?.cancel();
     if (_isTyping) {
       _isTyping = false;
@@ -64,6 +65,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     }
     _chat.sendMessage(text);
     _controller.clear();
+    _formKey.currentState?.reset();
   }
 
   void _openConversation(String contactId) {
@@ -183,35 +185,47 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                 borderRadius:
                     const BorderRadius.vertical(bottom: Radius.circular(24)),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      textInputAction: TextInputAction.send,
-                      maxLength: 2000,
-                      decoration: InputDecoration(
-                        hintText: 'Escribe un mensaje...',
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
+              child: Form(
+                key: _formKey,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _controller,
+                        textInputAction: TextInputAction.send,
+                        maxLength: 2000,
+                        decoration: InputDecoration(
+                          hintText: 'Escribe un mensaje...',
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                         ),
-                        filled: true,
-                        fillColor: colorScheme.surface,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                        onChanged: _onTextChanged,
+                        onFieldSubmitted: _sendMessage,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return '';
+                          }
+                          if (value.trim().length > 2000) {
+                            return 'Máximo 2000 caracteres';
+                          }
+                          return null;
+                        },
                       ),
-                      onChanged: _onTextChanged,
-                      onSubmitted: _sendMessage,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () => _sendMessage(_controller.text),
-                    icon: Icon(Icons.send_rounded, color: colorScheme.secondary),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => _sendMessage(_controller.text),
+                      icon: Icon(Icons.send_rounded, color: colorScheme.secondary),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
