@@ -9,44 +9,72 @@ import '../../../../features/people_professor/domain/models/person_model.dart';
 import '../../../../features/people_professor/presentation/riverpod/people_professor_riverpod.dart';
 import '../../../../features/people_professor/presentation/widgets/role_section.dart';
 
-class ArchivedPeopleProfessorPage extends ConsumerWidget {
+class ArchivedPeopleProfessorPage extends ConsumerStatefulWidget {
   final String subjectName;
+  final int courseId;
 
-  const ArchivedPeopleProfessorPage({super.key, required this.subjectName});
+  const ArchivedPeopleProfessorPage({
+    super.key,
+    required this.subjectName,
+    this.courseId = 0,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ArchivedPeopleProfessorPage> createState() =>
+      _ArchivedPeopleProfessorPageState();
+}
+
+class _ArchivedPeopleProfessorPageState
+    extends ConsumerState<ArchivedPeopleProfessorPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref
+          .read(professorPeopleProvider.notifier)
+          .loadPeople(widget.courseId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final state = ref.watch(professorPeopleForCourseProvider(0));
+    final state =
+        ref.watch(professorPeopleForCourseProvider(widget.courseId));
 
-    final teachers = state.people.where((p) => p.role == ClassRole.teacher).toList();
-    final students = state.people.where((p) => p.role == ClassRole.student).toList();
+    final teachers =
+        state.people.where((p) => p.role == ClassRole.teacher).toList();
+    final students =
+        state.people.where((p) => p.role == ClassRole.student).toList();
 
     return Scaffold(
       drawer: const NavbarProfessors(),
-      bottomNavigationBar: ArchivedProfessorSubjectBottomNav(subjectName: subjectName),
+      bottomNavigationBar:
+          ArchivedProfessorSubjectBottomNav(subjectName: widget.subjectName),
       body: Column(
         children: [
           const HeaderProfessors(),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              children: [
-                const SizedBox(height: 16),
-                Text(
-                  subjectName,
-                  style: textTheme.headlineMedium?.copyWith(
-                    color: colorScheme.secondary,
-                    fontWeight: FontWeight.bold,
+            child: state.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    children: [
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.subjectName,
+                        style: textTheme.headlineMedium?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      RoleSection(title: 'Profesor', people: teachers),
+                      RoleSection(title: 'Alumnos', people: students),
+                      const SizedBox(height: 40),
+                    ],
                   ),
-                ),
-                RoleSection(title: 'Profesor', people: teachers),
-                RoleSection(title: 'Alumnos', people: students),
-                const SizedBox(height: 40),
-              ],
-            ),
           ),
         ],
       ),

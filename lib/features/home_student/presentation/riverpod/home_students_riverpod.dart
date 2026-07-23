@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
 import '../../di/home_student_di.dart';
+import '../../domain/entities/enrolled_course_entity.dart';
 import '../../domain/entities/join_course_entity.dart';
 import '../../domain/models/subject_model.dart';
 import '../../domain/usecases/get_my_enrollments_usecase.dart';
@@ -27,6 +28,7 @@ class HomeStudentState {
   final String? joinError;
   final JoinCourseEntity? joinResult;
   final List<SubjectModel> subjects;
+  final List<EnrolledCourseEntity> enrollments;
 
   const HomeStudentState({
     this.isLoading = false,
@@ -35,6 +37,7 @@ class HomeStudentState {
     this.joinError,
     this.joinResult,
     this.subjects = const [],
+    this.enrollments = const [],
   });
 
   HomeStudentState copyWith({
@@ -44,6 +47,7 @@ class HomeStudentState {
     String? joinError,
     JoinCourseEntity? joinResult,
     List<SubjectModel>? subjects,
+    List<EnrolledCourseEntity>? enrollments,
   }) {
     return HomeStudentState(
       isLoading: isLoading ?? this.isLoading,
@@ -52,6 +56,7 @@ class HomeStudentState {
       joinError: joinError,
       joinResult: joinResult ?? this.joinResult,
       subjects: subjects ?? this.subjects,
+      enrollments: enrollments ?? this.enrollments,
     );
   }
 }
@@ -79,7 +84,7 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
             ),
           )
           .toList();
-      state = state.copyWith(subjects: subjects);
+      state = state.copyWith(subjects: subjects, enrollments: enrollments);
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('loadEnrollments error: $e\n$st');
@@ -118,4 +123,13 @@ final homeStudentProvider =
 
 final subjectsProvider = Provider<List<SubjectModel>>((ref) {
   return ref.watch(homeStudentProvider).subjects;
+});
+
+final enrolledCoursesProvider = Provider<List<EnrolledCourseEntity>>((ref) {
+  return ref.watch(homeStudentProvider).enrollments;
+});
+
+final archivedEnrollmentsProvider = Provider<List<EnrolledCourseEntity>>((ref) {
+  final courses = ref.watch(enrolledCoursesProvider);
+  return courses.where((e) => e.status == 'archived').toList();
 });

@@ -123,7 +123,7 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: _selectedFileType,
+                        initialValue: _selectedFileType,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
@@ -254,7 +254,21 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) return 'Requerido';
+            if (label == 'URL del archivo') {
+              if (!v.trim().startsWith('http://') && !v.trim().startsWith('https://')) {
+                return 'Debe ser una URL válida (http/https)';
+              }
+              if (v.trim().length > 2048) {
+                return 'La URL es demasiado larga';
+              }
+            }
+            if (label == 'Título' && v.trim().length > 200) {
+              return 'Máximo 200 caracteres';
+            }
+            return null;
+          },
           style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: hint,

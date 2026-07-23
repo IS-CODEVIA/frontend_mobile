@@ -1,5 +1,6 @@
 class ArchivedSubjectModel {
   final String id;
+  final int courseId;
   final String title;
   final String subtitle;
   final String teacherName;
@@ -7,6 +8,7 @@ class ArchivedSubjectModel {
 
   const ArchivedSubjectModel({
     required this.id,
+    required this.courseId,
     required this.title,
     required this.subtitle,
     required this.teacherName,

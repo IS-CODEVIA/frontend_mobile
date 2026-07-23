@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
+import '../../../auth/presentation/riverpod/auth_riverpod.dart';
+import '../../../study_plan/presentation/widgets/study_plan_modal.dart';
 import '../../../transcription/domain/entities/transcription_entity.dart';
 import '../../../transcription/presentation/pages/transcription_detail_page_student.dart';
 import '../../../transcription/presentation/riverpod/transcription_riverpod.dart';
@@ -75,12 +77,34 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     Icon(Icons.folder_outlined,
                         color: colorScheme.secondary, size: 24),
                     const SizedBox(width: 8),
-                    Text(
-                      'Material de ${widget.subjectName}',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Material de ${widget.subjectName}',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        final authUser = ref.read(authViewModelProvider).user;
+                        if (authUser == null) return;
+                        final topics = transcriptions
+                            .map((t) => t.classTopic)
+                            .where((t) => t.isNotEmpty)
+                            .toList();
+                        StudyPlanModal.show(
+                          context,
+                          courseName: widget.subjectName,
+                          userId: authUser.userId.toString(),
+                          sessionId: 'course_${widget.courseId}',
+                          topic: topics.isNotEmpty ? topics.join('; ') : widget.subjectName,
+                        );
+                      },
+                      icon: Icon(Icons.menu_book_rounded,
+                          color: colorScheme.secondary),
+                      tooltip: 'Generar plan de estudio',
                     ),
                   ],
                 ),

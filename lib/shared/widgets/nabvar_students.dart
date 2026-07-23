@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/riverpod/auth_riverpod.dart';
+import '../../features/offline_files/presentation/pages/offline_files_page.dart';
 
 class NavbarStudents extends ConsumerWidget {
   const NavbarStudents({super.key});
@@ -51,7 +52,12 @@ class NavbarStudents extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMenuItem('Archivos offline', Icons.download_rounded, itemStyle, () {}),
+                  _buildMenuItem('Archivos offline', Icons.download_rounded, itemStyle, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const OfflineFilesPage()),
+                    );
+                  }),
                   const SizedBox(height: 16),
                   _buildMenuItem('Configuracion', Icons.settings_outlined, itemStyle, () => context.goNamed('settings')),
                   const SizedBox(height: 16),

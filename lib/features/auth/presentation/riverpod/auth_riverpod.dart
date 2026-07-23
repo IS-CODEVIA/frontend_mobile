@@ -69,12 +69,14 @@ class UserData {
   final String name;
   final String email;
   final int roleId;
+  final String? avatarUrl;
 
   const UserData({
     required this.userId,
     required this.name,
     required this.email,
     required this.roleId,
+    this.avatarUrl,
   });
 }
 
@@ -108,6 +110,7 @@ class AuthNotifier extends Notifier<AuthState> {
           name: payload.user.name,
           email: payload.user.email,
           roleId: payload.user.roleId,
+          avatarUrl: payload.user.avatarUrl,
         ),
       );
     } on Exception catch (e) {
@@ -144,6 +147,7 @@ class AuthNotifier extends Notifier<AuthState> {
           name: payload.user.name,
           email: payload.user.email,
           roleId: payload.user.roleId,
+          avatarUrl: payload.user.avatarUrl,
         ),
       );
     } on Exception catch (e) {
@@ -165,6 +169,20 @@ class AuthNotifier extends Notifier<AuthState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  void updateAvatarUrl(String? avatarUrl) {
+    final current = state.user;
+    if (current == null) return;
+    state = state.copyWith(
+      user: UserData(
+        userId: current.userId,
+        name: current.name,
+        email: current.email,
+        roleId: current.roleId,
+        avatarUrl: avatarUrl,
+      ),
+    );
   }
 }
 

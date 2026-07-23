@@ -88,6 +88,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Ingresa tu correo';
                           }
+                          if (value.trim().length > 254) {
+                            return 'Correo demasiado largo';
+                          }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
                               .hasMatch(value.trim())) {
                             return 'Correo no válido';
@@ -106,6 +109,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           }
                           if (value.trim().length < 6) {
                             return 'Mínimo 6 caracteres';
+                          }
+                          if (value.trim().length > 100) {
+                            return 'Máximo 100 caracteres';
                           }
                           return null;
                         },

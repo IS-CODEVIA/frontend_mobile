@@ -16,7 +16,7 @@ class HomeProfessorPage extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final courses = ref.watch(professorSubjectsProvider);
+    final courses = ref.watch(activeProfessorSubjectsProvider);
 
     return Scaffold(
       drawer: const NavbarProfessors(),

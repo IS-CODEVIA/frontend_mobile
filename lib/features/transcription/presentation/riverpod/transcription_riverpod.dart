@@ -32,6 +32,7 @@ class TranscriptionsNotifier extends Notifier<List<TranscriptionEntity>> {
     try {
       final transcriptions =
           await ref.read(_getTranscriptionsUsecaseProvider)();
+      transcriptions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       state = transcriptions;
     } catch (_) {}
   }

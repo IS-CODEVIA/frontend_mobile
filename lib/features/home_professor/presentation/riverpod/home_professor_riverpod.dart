@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
+import '../../data/datasources/course_remote_datasource.dart';
 import '../../di/home_professor_di.dart';
 import '../../domain/entities/course_entity.dart';
 import '../../domain/usecases/create_course_usecase.dart';
@@ -19,9 +20,17 @@ final _createCourseUsecaseProvider = Provider<CreateCourseUsecase>((ref) {
   return ref.watch(_homeProfessorDIProvider).createCourseUsecase;
 });
 
+final _courseRemoteDataSourceProvider = Provider<CourseRemoteDataSource>((ref) {
+  return ref.watch(_homeProfessorDIProvider).courseRemoteDataSource;
+});
+
 final professorSubjectsProvider =
     NotifierProvider<ProfessorSubjectsNotifier, List<CourseEntity>>(
   ProfessorSubjectsNotifier.new,
+);
+
+final archivedCourseIdsProvider = NotifierProvider<ArchivedCourseIdsNotifier, Set<int>>(
+  ArchivedCourseIdsNotifier.new,
 );
 
 class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
@@ -64,4 +73,61 @@ class ProfessorSubjectsNotifier extends Notifier<List<CourseEntity>> {
       return null;
     }
   }
+
+  Future<bool> archiveCourse(int courseId) async {
+    try {
+      final ds = ref.read(_courseRemoteDataSourceProvider);
+      final classes = await ds.getClasses(courseId);
+      for (final c in classes) {
+        if (!c.archived) {
+          await ds.archiveClass(c.classId);
+        }
+      }
+      ref.read(archivedCourseIdsProvider.notifier).add(courseId);
+      return true;
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('archiveCourse error: $e\n$st');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> unarchiveCourse(int courseId) async {
+    try {
+      final ds = ref.read(_courseRemoteDataSourceProvider);
+      final classes = await ds.getClasses(courseId);
+      for (final c in classes) {
+        if (c.archived) {
+          await ds.unarchiveClass(c.classId);
+        }
+      }
+      ref.read(archivedCourseIdsProvider.notifier).remove(courseId);
+      return true;
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('unarchiveCourse error: $e\n$st');
+      }
+      return false;
+    }
+  }
 }
+
+class ArchivedCourseIdsNotifier extends Notifier<Set<int>> {
+  @override
+  Set<int> build() => {};
+
+  void add(int id) {
+    state = {...state, id};
+  }
+
+  void remove(int id) {
+    state = {...state}..remove(id);
+  }
+}
+
+final activeProfessorSubjectsProvider = Provider<List<CourseEntity>>((ref) {
+  final courses = ref.watch(professorSubjectsProvider);
+  final archivedIds = ref.watch(archivedCourseIdsProvider);
+  return courses.where((c) => !archivedIds.contains(c.courseId)).toList();
+});

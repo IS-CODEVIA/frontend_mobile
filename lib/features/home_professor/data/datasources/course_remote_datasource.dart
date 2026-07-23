@@ -1,16 +1,22 @@
 import '../../../../core/network/api_client.dart';
 import '../models/course_model.dart';
 
-class SubjectData {
-  final int subjectId;
-  final String subjectName;
+class ClassData {
+  final int classId;
+  final int courseId;
+  final bool archived;
 
-  const SubjectData({required this.subjectId, required this.subjectName});
+  const ClassData({
+    required this.classId,
+    required this.courseId,
+    required this.archived,
+  });
 
-  factory SubjectData.fromJson(Map<String, dynamic> json) {
-    return SubjectData(
-      subjectId: json['subjectID'] as int,
-      subjectName: json['subjectName'] as String,
+  factory ClassData.fromJson(Map<String, dynamic> json) {
+    return ClassData(
+      classId: json['classID'] as int,
+      courseId: json['courseID'] as int,
+      archived: json['archived'] as bool? ?? false,
     );
   }
 }
@@ -20,19 +26,59 @@ class CourseRemoteDataSource {
 
   const CourseRemoteDataSource({required this.apiClient});
 
-  Future<List<SubjectData>> getSubjects() async {
+  Future<List<ClassData>> getClasses(int courseId) async {
     const query = '''
-      query {
-        subjects {
-          subjectID
-          subjectName
+      query(\$courseID: Int!) {
+        classes(courseID: \$courseID) {
+          classID
+          courseID
+          archived
         }
       }
     ''';
 
-    final data = await apiClient.request(query: query);
-    final list = data['subjects'] as List;
-    return list.map((e) => SubjectData.fromJson(e as Map<String, dynamic>)).toList();
+    final data = await apiClient.request(
+      query: query,
+      variables: {'courseID': courseId},
+      requiresAuth: true,
+    );
+
+    final list = data['classes'] as List;
+    return list.map((e) => ClassData.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> archiveClass(int classId) async {
+    const query = '''
+      mutation(\$classID: Int!) {
+        archiveClass(classID: \$classID) {
+          classID
+          archived
+        }
+      }
+    ''';
+
+    await apiClient.request(
+      query: query,
+      variables: {'classID': classId},
+      requiresAuth: true,
+    );
+  }
+
+  Future<void> unarchiveClass(int classId) async {
+    const query = '''
+      mutation(\$classID: Int!) {
+        unarchiveClass(classID: \$classID) {
+          classID
+          archived
+        }
+      }
+    ''';
+
+    await apiClient.request(
+      query: query,
+      variables: {'classID': classId},
+      requiresAuth: true,
+    );
   }
 
   Future<List<CourseModel>> getCourses() async {

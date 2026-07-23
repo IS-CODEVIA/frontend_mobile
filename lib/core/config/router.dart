@@ -10,6 +10,7 @@ import '../../features/transcriptor_student/presentation/pages/transcriptor_stud
 import '../../features/assignment_notices/presentation/pages/assignment_notices_page.dart';
 import '../../features/material_students/presentation/pages/material_students_page.dart';
 import '../../features/people_student/presentation/pages/people_student_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/settings_students/presentation/pages/settings_students_page.dart';
 import '../../features/archived_assignment_notices/presentation/pages/archived_assignment_notices_page.dart';
 import '../../features/archived_material_students/presentation/pages/archived_material_students_page.dart';
@@ -110,6 +111,11 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: '/profile',
+      name: 'profile',
+      builder: (context, state) => const ProfilePage(),
+    ),
+    GoRoute(
       path: '/settings',
       name: 'settings',
       builder: (context, state) => const SettingsStudentsPage(),
@@ -120,7 +126,11 @@ final appRouter = GoRouter(
       name: 'archived-assignment-notices',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return ArchivedAssignmentNoticesPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return ArchivedAssignmentNoticesPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -128,7 +138,11 @@ final appRouter = GoRouter(
       name: 'archived-material-students',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return ArchivedMaterialStudentsPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return ArchivedMaterialStudentsPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -136,7 +150,11 @@ final appRouter = GoRouter(
       name: 'archived-people-student',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return ArchivedPeopleStudentPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return ArchivedPeopleStudentPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     // Professor routes
@@ -154,6 +172,11 @@ final appRouter = GoRouter(
       path: '/professor-settings',
       name: 'professor-settings',
       builder: (context, state) => const SettingsProfessorPage(),
+    ),
+    GoRoute(
+      path: '/professor-profile',
+      name: 'professor-profile',
+      builder: (context, state) => const ProfilePage(),
     ),
     GoRoute(
       path: '/professor-assignment-notices/:subjectName',
@@ -213,7 +236,11 @@ final appRouter = GoRouter(
       name: 'professor-archived-assignment-notices',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return ArchivedAssignmentNoticesProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return ArchivedAssignmentNoticesProfessorPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
     GoRoute(
@@ -221,7 +248,11 @@ final appRouter = GoRouter(
       name: 'professor-archived-material-students',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return ArchivedMaterialProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return ArchivedMaterialProfessorPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
 
       },
     ),
@@ -230,7 +261,11 @@ final appRouter = GoRouter(
       name: 'professor-archived-people-student',
       builder: (context, state) {
         final subjectName = state.pathParameters['subjectName']!;
-        return ArchivedPeopleProfessorPage(subjectName: subjectName);
+        final extra = state.extra as Map<String, dynamic>?;
+        return ArchivedPeopleProfessorPage(
+          subjectName: subjectName,
+          courseId: extra?['courseId'] as int? ?? 0,
+        );
       },
     ),
   ],
