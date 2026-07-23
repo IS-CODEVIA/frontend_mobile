@@ -123,7 +123,7 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: _selectedFileType,
+                        initialValue: _selectedFileType,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),

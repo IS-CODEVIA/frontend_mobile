@@ -20,7 +20,6 @@ class JoinClassModal extends ConsumerStatefulWidget {
 
 class _JoinClassModalState extends ConsumerState<JoinClassModal> {
   final _codeController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -29,9 +28,8 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
   }
 
   Future<void> _handleJoin() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-
-    final code = _codeController.text.trim().toUpperCase();
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
 
     final notifier = ref.read(homeStudentProvider.notifier);
     final result = await notifier.joinCourse(code);
@@ -87,75 +85,49 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
               ),
             ),
             const SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'C\u00f3digo de clase',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.secondary,
-                      fontWeight: FontWeight.w500,
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'C\u00f3digo de clase',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.secondary,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _codeController,
-                    textAlign: TextAlign.center,
-                    textCapitalization: TextCapitalization.characters,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurface,
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _codeController,
+                  textAlign: TextAlign.center,
+                  textCapitalization: TextCapitalization.characters,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    letterSpacing: 4,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'ABC-123',
+                    hintStyle: textTheme.titleMedium?.copyWith(
+                      color: colorScheme.outline,
                       letterSpacing: 4,
                     ),
-                    decoration: InputDecoration(
-                      hintText: 'ABC-123',
-                      hintStyle: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.outline,
-                        letterSpacing: 4,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.secondary),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: colorScheme.secondary,
-                          width: 2,
-                        ),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.error),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.error, width: 2),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: colorScheme.secondary),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: colorScheme.secondary,
+                        width: 2,
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Ingresa el código de la clase';
-                      }
-                      if (value.trim().length < 6) {
-                        return 'Mínimo 6 caracteres';
-                      }
-                      if (value.trim().length > 10) {
-                        return 'Máximo 10 caracteres';
-                      }
-                      if (!RegExp(r'^[A-Za-z0-9-]+$').hasMatch(value.trim())) {
-                        return 'Solo letras, números y guiones';
-                      }
-                      return null;
-                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             if (state.joinError != null) ...[
               const SizedBox(height: 12),

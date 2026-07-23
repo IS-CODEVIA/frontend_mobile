@@ -75,12 +75,21 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     Icon(Icons.folder_outlined,
                         color: colorScheme.secondary, size: 24),
                     const SizedBox(width: 8),
-                    Text(
-                      'Material de ${widget.subjectName}',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Material de ${widget.subjectName}',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                    ),
+                    IconButton(
+                      onPressed: () => setState(
+                          () => _selectedFilter = _ContentFilter.transcriptions),
+                      icon: Icon(Icons.menu_book_rounded,
+                          color: colorScheme.secondary),
+                      tooltip: 'Ver transcripciones',
                     ),
                   ],
                 ),
