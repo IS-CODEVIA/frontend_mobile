@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
 import '../../../../shared/widgets_professor/header_professors.dart';
 import '../../../../shared/widgets_professor/navbar_professors.dart';
 import '../../../../shared/widgets_professor/professor_subject_bottom_nav.dart';
@@ -54,6 +55,9 @@ class _MaterialProfessorPageState
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+    final isSmall = MediaQuery.of(context).size.width < 360;
+    final padding = horizontalPadding(context);
 
     final materials =
         ref.watch(materialsByCourseIdProvider(widget.courseId));
@@ -83,145 +87,154 @@ class _MaterialProfessorPageState
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Icon(Icons.add, color: colorScheme.onSecondary, size: 32),
+        child: Icon(Icons.add, color: colorScheme.onSecondary, size: isSmall ? 24 : 32),
       ),
       body: Column(
         children: [
           const HeaderProfessors(),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ListView(
-                children: [
-                  if (widget.joinCode != null &&
-                      widget.joinCode!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(12),
-                        border:
-                            Border.all(color: colorScheme.outlineVariant),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.key_rounded,
-                            size: 16,
-                            color: colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              children: [
+                if (widget.joinCode != null &&
+                    widget.joinCode!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: colorScheme.outlineVariant),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.key_rounded,
+                          size: 16,
+                          color: colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
                             'Código de clase: ',
                             style: textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
+                              fontSize: responsiveFontSize(context, 14),
                             ),
                           ),
-                          Text(
+                        ),
+                        Flexible(
+                          child: Text(
                             widget.joinCode!,
                             style: textTheme.titleMedium?.copyWith(
                               color: colorScheme.secondary,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
+                              fontSize: responsiveFontSize(context, 16),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(Icons.folder_outlined,
-                          color: colorScheme.secondary, size: 24),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Material de ${widget.subjectName}',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorScheme.outlineVariant),
-                    ),
-                    child: PopupMenuButton<_ContentFilter>(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      onSelected: (value) =>
-                          setState(() => _selectedFilter = value),
-                      itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: _ContentFilter.all,
-                          child: _FilterItem(
-                            icon: Icons.select_all_rounded,
-                            label: 'Todo',
-                            isSelected: _selectedFilter == _ContentFilter.all,
-                            colorScheme: colorScheme,
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: _ContentFilter.materials,
-                          child: _FilterItem(
-                            icon: Icons.folder_outlined,
-                            label: 'Materiales',
-                            isSelected:
-                                _selectedFilter == _ContentFilter.materials,
-                            colorScheme: colorScheme,
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: _ContentFilter.transcriptions,
-                          child: _FilterItem(
-                            icon: Icons.menu_book_rounded,
-                            label: 'Transcripciones',
-                            isSelected:
-                                _selectedFilter == _ContentFilter.transcriptions,
-                            colorScheme: colorScheme,
                           ),
                         ),
                       ],
-                      child: Row(
-                        children: [
-                          Icon(Icons.filter_alt_rounded,
-                              size: 20, color: colorScheme.onSurfaceVariant),
-                          const SizedBox(width: 8),
-                          Text(
-                            _filterLabel(_selectedFilter),
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const Spacer(),
-                          Icon(Icons.arrow_drop_down_rounded,
-                              color: colorScheme.onSurfaceVariant),
-                        ],
-                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  if (_selectedFilter != _ContentFilter.transcriptions)
-                    ..._buildMaterialsSection(colorScheme, textTheme, materials),
-                  if (_selectedFilter != _ContentFilter.materials)
-                    ..._buildTranscriptionsSection(
-                        colorScheme, textTheme, transcriptions),
-                  const SizedBox(height: 80),
                 ],
-              ),
+                SizedBox(height: isTablet ? 24 : 16),
+                Row(
+                  children: [
+                    Icon(Icons.folder_outlined,
+                        color: colorScheme.secondary,
+                        size: isTablet ? 28 : 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Material de ${widget.subjectName}',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.secondary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: responsiveFontSize(context, 16),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: isTablet ? 16 : 12),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                      horizontal: isSmall ? 12 : 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colorScheme.outlineVariant),
+                  ),
+                  child: PopupMenuButton<_ContentFilter>(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) =>
+                        setState(() => _selectedFilter = value),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: _ContentFilter.all,
+                        child: _FilterItem(
+                          icon: Icons.select_all_rounded,
+                          label: 'Todo',
+                          isSelected: _selectedFilter == _ContentFilter.all,
+                          colorScheme: colorScheme,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: _ContentFilter.materials,
+                        child: _FilterItem(
+                          icon: Icons.folder_outlined,
+                          label: 'Materiales',
+                          isSelected:
+                              _selectedFilter == _ContentFilter.materials,
+                          colorScheme: colorScheme,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: _ContentFilter.transcriptions,
+                        child: _FilterItem(
+                          icon: Icons.menu_book_rounded,
+                          label: 'Transcripciones',
+                          isSelected:
+                              _selectedFilter == _ContentFilter.transcriptions,
+                          colorScheme: colorScheme,
+                        ),
+                      ),
+                    ],
+                    child: Row(
+                      children: [
+                        Icon(Icons.filter_alt_rounded,
+                            size: isSmall ? 18 : 20,
+                            color: colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 8),
+                        Text(
+                          _filterLabel(_selectedFilter),
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                            fontSize: responsiveFontSize(context, 14),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.arrow_drop_down_rounded,
+                            color: colorScheme.onSurfaceVariant),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: isTablet ? 24 : 16),
+                if (_selectedFilter != _ContentFilter.transcriptions)
+                  ..._buildMaterialsSection(colorScheme, textTheme, materials),
+                if (_selectedFilter != _ContentFilter.materials)
+                  ..._buildTranscriptionsSection(
+                      colorScheme, textTheme, transcriptions),
+                SizedBox(height: isTablet ? 100 : 80),
+              ],
             ),
           ),
         ],
