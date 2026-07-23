@@ -35,6 +35,8 @@ class _OfflineFilesPageState extends ConsumerState<OfflineFilesPage> {
         return 'Plan de estudio';
       case 'material':
         return 'Material';
+      case 'transcription':
+        return 'Transcripción';
       default:
         return source;
     }
@@ -46,6 +48,8 @@ class _OfflineFilesPageState extends ConsumerState<OfflineFilesPage> {
         return Icons.menu_book_rounded;
       case 'material':
         return Icons.folder_outlined;
+      case 'transcription':
+        return Icons.transcribe_rounded;
       default:
         return Icons.insert_drive_file_outlined;
     }

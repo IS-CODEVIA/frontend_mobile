@@ -1,12 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
+import '../../../../core/utils/pdf_fonts.dart';
 import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
 import '../../../auth/presentation/riverpod/auth_riverpod.dart';
+import '../../../offline_files/data/offline_files_service.dart';
 import '../../data/datasources/feedback_remote_datasource.dart';
 import '../../domain/entities/study_plan_entity.dart';
 import '../../domain/entities/transcription_entity.dart';
@@ -64,31 +66,71 @@ class _TranscriptionDetailStudentPageState
     }
   }
 
-  void _downloadTranscription(BuildContext context) {
+  Future<void> _downloadTranscription(BuildContext context) async {
     final title = widget.transcription.classTopic.isNotEmpty
         ? widget.transcription.classTopic
         : 'Transcripcion';
     final sanitized = title.replaceAll(RegExp(r'[^\w\s]'), '');
-    final content =
-        '$title\n${widget.transcription.createdAt}\n\n${widget.transcription.fullText}';
+    final fileName =
+        '${sanitized}_${widget.transcription.transcriptionId}.pdf';
 
     try {
-      final file = File('${Directory.systemTemp.path}/$sanitized.txt');
-      file.writeAsStringSync(content);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Transcripción descargada: $sanitized.txt'),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
+      final fontRegular = await PdfFonts.regular;
+      final fontBold = await PdfFonts.bold;
+
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (ctx) => [
+            pw.Header(
+              level: 0,
+              child: pw.Text(title,
+                  style: pw.TextStyle(
+                    font: fontBold,
+                    fontSize: 22,
+                  )),
+            ),
+            pw.Paragraph(
+                text: widget.transcription.createdAt,
+                style: pw.TextStyle(
+                    font: fontRegular, fontSize: 12, color: PdfColors.grey600)),
+            pw.SizedBox(height: 16),
+            pw.Paragraph(
+              text: widget.transcription.fullText,
+              style: pw.TextStyle(font: fontRegular, fontSize: 11),
+            ),
+          ],
         ),
       );
+
+      final bytes = await pdf.save();
+
+      await ref.read(offlineFilesServiceProvider).saveFile(
+        fileName: fileName,
+        bytes: bytes,
+        source: 'transcription',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transcripción descargada: $fileName'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al descargar la transcripción'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al descargar la transcripción'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

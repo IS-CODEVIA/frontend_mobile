@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
-import '../../../auth/presentation/riverpod/auth_riverpod.dart';
 import '../../../study_plan/presentation/widgets/study_plan_modal.dart';
 import '../../../transcription/domain/entities/transcription_entity.dart';
 import '../../../transcription/presentation/pages/transcription_detail_page_student.dart';
@@ -88,8 +87,6 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     ),
                     IconButton(
                       onPressed: () {
-                        final authUser = ref.read(authViewModelProvider).user;
-                        if (authUser == null) return;
                         final topics = transcriptions
                             .map((t) => t.classTopic)
                             .where((t) => t.isNotEmpty)
@@ -97,8 +94,8 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                         StudyPlanModal.show(
                           context,
                           courseName: widget.subjectName,
-                          userId: authUser.userId.toString(),
-                          sessionId: 'course_${widget.courseId}',
+                          userId: '1',
+                          sessionId: 'live:${widget.courseId}',
                           topic: topics.isNotEmpty ? topics.join('; ') : widget.subjectName,
                         );
                       },

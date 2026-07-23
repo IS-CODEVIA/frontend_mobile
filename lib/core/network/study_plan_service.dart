@@ -32,7 +32,7 @@ class StudyPlanService {
     if (response.statusCode == 404) {
       throw Exception('La sesión aún está en proceso. Intenta en unos minutos.');
     }
-    throw Exception('Error del servidor (${response.statusCode})');
+    throw Exception('Error ${response.statusCode} en $uri: ${response.body}');
   }
 
   Future<Map<String, dynamic>> getStudyPlan(String sessionId) async {
