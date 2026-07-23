@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
 import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
-import '../../../auth/presentation/riverpod/auth_riverpod.dart';
 import '../../../study_plan/presentation/widgets/study_plan_modal.dart';
 import '../../../transcription/domain/entities/transcription_entity.dart';
 import '../../../transcription/presentation/pages/transcription_detail_page_student.dart';
@@ -52,6 +52,9 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isSmall = MediaQuery.of(context).size.width < 360;
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+    final padding = horizontalPadding(context);
 
     final materials =
         ref.watch(studentMaterialsForCourseProvider(widget.courseId));
@@ -69,13 +72,14 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
           const HeaderStudents(),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: EdgeInsets.symmetric(horizontal: padding),
               children: [
-                const SizedBox(height: 16),
+                SizedBox(height: isTablet ? 24 : 16),
                 Row(
                   children: [
                     Icon(Icons.folder_outlined,
-                        color: colorScheme.secondary, size: 24),
+                        color: colorScheme.secondary,
+                        size: isTablet ? 28 : 24),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -83,13 +87,12 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.bold,
+                          fontSize: responsiveFontSize(context, 16),
                         ),
                       ),
                     ),
                     IconButton(
                       onPressed: () {
-                        final authUser = ref.read(authViewModelProvider).user;
-                        if (authUser == null) return;
                         final topics = transcriptions
                             .map((t) => t.classTopic)
                             .where((t) => t.isNotEmpty)
@@ -97,8 +100,8 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                         StudyPlanModal.show(
                           context,
                           courseName: widget.subjectName,
-                          userId: authUser.userId.toString(),
-                          sessionId: 'course_${widget.courseId}',
+                          userId: '1',
+                          sessionId: 'live:${widget.courseId}',
                           topic: topics.isNotEmpty ? topics.join('; ') : widget.subjectName,
                         );
                       },
@@ -108,10 +111,11 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: isTablet ? 16 : 12),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: isSmall ? 12 : 16, vertical: 4),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(12),
@@ -158,13 +162,15 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     child: Row(
                       children: [
                         Icon(Icons.filter_alt_rounded,
-                            size: 20, color: colorScheme.onSurfaceVariant),
+                            size: isSmall ? 18 : 20,
+                            color: colorScheme.onSurfaceVariant),
                         const SizedBox(width: 8),
                         Text(
                           _filterLabel(_selectedFilter),
                           style: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
+                            fontSize: responsiveFontSize(context, 14),
                           ),
                         ),
                         const Spacer(),
@@ -174,13 +180,13 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: isTablet ? 24 : 16),
                 if (_selectedFilter != _ContentFilter.transcriptions)
                   ..._buildMaterialsSection(colorScheme, textTheme, materials),
                 if (_selectedFilter != _ContentFilter.materials)
                   ..._buildTranscriptionsSection(
                       colorScheme, textTheme, transcriptions),
-                const SizedBox(height: 40),
+                SizedBox(height: isTablet ? 60 : 40),
               ],
             ),
           ),

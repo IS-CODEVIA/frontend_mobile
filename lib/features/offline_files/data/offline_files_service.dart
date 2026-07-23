@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'pdf_saver_io.dart' if (dart.library.js_interop) 'pdf_saver_web.dart'
+    as pdf_saver;
 
 class OfflineFileInfo {
   final String fileName;
@@ -21,35 +24,28 @@ class OfflineFileInfo {
 class OfflineFilesService {
   static const _manifestKey = 'offline_files_manifest';
 
-  Future<Directory> get _storageDir async {
-    final dir = await getApplicationDocumentsDirectory();
-    final offline = Directory('${dir.path}/offline_files');
-    if (!await offline.exists()) {
-      await offline.create(recursive: true);
-    }
-    return offline;
-  }
-
   Future<String> saveFile({
     required String fileName,
     required List<int> bytes,
     required String source,
   }) async {
-    final dir = await _storageDir;
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(bytes);
+    final filePath = await pdf_saver.savePdfBytes(fileName, bytes);
 
-    final prefs = await SharedPreferences.getInstance();
-    final manifest = prefs.getStringList(_manifestKey) ?? [];
-    manifest.add(jsonEncode({
-      'fileName': fileName,
-      'filePath': file.path,
-      'savedAt': DateTime.now().toIso8601String(),
-      'source': source,
-    }));
-    await prefs.setStringList(_manifestKey, manifest);
+    // En web el archivo va a la carpeta de descargas del navegador;
+    // no hay ruta local que registrar en el manifiesto offline.
+    if (!kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      final manifest = prefs.getStringList(_manifestKey) ?? [];
+      manifest.add(jsonEncode({
+        'fileName': fileName,
+        'filePath': filePath,
+        'savedAt': DateTime.now().toIso8601String(),
+        'source': source,
+      }));
+      await prefs.setStringList(_manifestKey, manifest);
+    }
 
-    return file.path;
+    return filePath;
   }
 
   Future<List<OfflineFileInfo>> getFiles() async {

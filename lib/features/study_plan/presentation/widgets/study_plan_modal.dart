@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import '../../../../core/utils/pdf_fonts.dart';
 import '../../../offline_files/data/offline_files_service.dart';
 import '../../domain/entities/study_plan_entity.dart';
 import '../riverpod/study_plan_riverpod.dart';
@@ -9,7 +10,7 @@ import '../riverpod/study_plan_riverpod.dart';
 const _pdfPrimary = PdfColor.fromInt(0xff00CFBB);
 const _pdfSecondary = PdfColor.fromInt(0xff1C258F);
 
-pw.Widget _infoRow(String label, String value) {
+pw.Widget _infoRow(String label, String value, pw.Font fontBold, pw.Font fontRegular) {
   return pw.Padding(
     padding: const pw.EdgeInsets.symmetric(vertical: 2),
     child: pw.Row(
@@ -19,10 +20,12 @@ pw.Widget _infoRow(String label, String value) {
           width: 110,
           child: pw.Text(
             label,
-            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+            style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.grey700),
           ),
         ),
-        pw.Expanded(child: pw.Text(value, style: const pw.TextStyle(fontSize: 10))),
+        pw.Expanded(
+          child: pw.Text(value, style: pw.TextStyle(font: fontRegular, fontSize: 10)),
+        ),
       ],
     ),
   );
@@ -83,6 +86,9 @@ class _StudyPlanModalState extends ConsumerState<StudyPlanModal> {
   }
 
   Future<void> _saveAsPdf(StudyPlanEntity plan) async {
+    final fontRegular = await PdfFonts.regular;
+    final fontBold = await PdfFonts.bold;
+
     final pdf = pw.Document();
     pdf.addPage(
       pw.MultiPage(
@@ -148,51 +154,92 @@ class _StudyPlanModalState extends ConsumerState<StudyPlanModal> {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                _infoRow('Curso', widget.courseName),
-                _infoRow('Tema', plan.topic),
-                _infoRow('Dificultad', plan.difficulty),
-                _infoRow('Duración', '${plan.durationHours} horas'),
+                _infoRow('Curso', widget.courseName, fontBold, fontRegular),
+                _infoRow('Tema', plan.topic, fontBold, fontRegular),
+                _infoRow('Dificultad', plan.difficulty, fontBold, fontRegular),
+                _infoRow('Duración', '${plan.durationHours} horas', fontBold, fontRegular),
               ],
             ),
           ),
+          pw.SizedBox(height: 20),
+          pw.Header(
+            level: 1,
+            text: 'Introducción',
+            textStyle: pw.TextStyle(font: fontBold, fontSize: 14, color: _pdfSecondary),
+          ),
+          pw.Paragraph(text: plan.introduccion,
+              style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
           pw.SizedBox(height: 16),
-          pw.Header(level: 1, text: 'Introducción'),
-          pw.Paragraph(text: plan.introduccion),
-          pw.SizedBox(height: 16),
-          pw.Header(level: 1, text: 'Puntos de Estudio'),
+          pw.Header(
+            level: 1,
+            text: 'Puntos de Estudio',
+            textStyle: pw.TextStyle(font: fontBold, fontSize: 14, color: _pdfSecondary),
+          ),
           for (final point in plan.puntosDeEstudio) ...[
-            pw.Header(level: 2, text: point.titulo),
-            pw.Paragraph(text: '¿Por qué es importante?: ${point.porQueImporta}'),
-            pw.Paragraph(text: point.explicacion),
+            pw.Header(
+              level: 2,
+              text: point.titulo,
+              textStyle: pw.TextStyle(font: fontBold, fontSize: 12),
+            ),
+            pw.Paragraph(
+                text: '¿Por qué es importante?: ${point.porQueImporta}',
+                style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
+            pw.Paragraph(text: point.explicacion,
+                style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
             if (point.antesDeEntenderlo.isNotEmpty) ...[
-              pw.Paragraph(text: 'Antes de entenderlo: ${point.antesDeEntenderlo.join(", ")}'),
+              pw.Paragraph(
+                  text: 'Antes de entenderlo: ${point.antesDeEntenderlo.join(", ")}',
+                  style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
             ],
             if (point.comoSeRelaciona.isNotEmpty) ...[
-              pw.Paragraph(text: 'Se relaciona con: ${point.comoSeRelaciona.join(", ")}'),
+              pw.Paragraph(
+                  text: 'Se relaciona con: ${point.comoSeRelaciona.join(", ")}',
+                  style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
             ],
             if (point.ejemplo.isNotEmpty) ...[
-              pw.Paragraph(text: 'Ejemplo: ${point.ejemplo}'),
+              pw.Paragraph(text: 'Ejemplo: ${point.ejemplo}',
+                  style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
             ],
             pw.SizedBox(height: 12),
           ],
-          pw.Header(level: 1, text: 'Orden de Estudio'),
+          pw.Header(
+            level: 1,
+            text: 'Orden de Estudio',
+            textStyle: pw.TextStyle(font: fontBold, fontSize: 14, color: _pdfSecondary),
+          ),
           for (final order in plan.ordenDeEstudio) ...[
-            pw.Paragraph(text: '${order.orden}. ${order.tema} — ${order.razon}'),
+            pw.Paragraph(text: '${order.orden}. ${order.tema} — ${order.razon}',
+                style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
           ],
           pw.SizedBox(height: 16),
-          pw.Header(level: 1, text: 'Recomendaciones'),
+          pw.Header(
+            level: 1,
+            text: 'Recomendaciones',
+            textStyle: pw.TextStyle(font: fontBold, fontSize: 14, color: _pdfSecondary),
+          ),
           if (plan.recomendaciones.repasarAntes.isNotEmpty) ...[
-            pw.Paragraph(text: 'Repasar antes: ${plan.recomendaciones.repasarAntes.join(", ")}'),
+            pw.Paragraph(
+                text: 'Repasar antes: ${plan.recomendaciones.repasarAntes.join(", ")}',
+                style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
           ],
           if (plan.recomendaciones.conceptosParaPracticar.isNotEmpty) ...[
-            pw.Paragraph(text: 'Practicar: ${plan.recomendaciones.conceptosParaPracticar.join(", ")}'),
+            pw.Paragraph(
+                text: 'Practicar: ${plan.recomendaciones.conceptosParaPracticar.join(", ")}',
+                style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
           ],
           if (plan.recomendaciones.comoReforzar.isNotEmpty) ...[
-            pw.Paragraph(text: 'Reforzar: ${plan.recomendaciones.comoReforzar.join(", ")}'),
+            pw.Paragraph(
+                text: 'Reforzar: ${plan.recomendaciones.comoReforzar.join(", ")}',
+                style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
           ],
           pw.SizedBox(height: 16),
-          pw.Header(level: 1, text: 'Resumen Final'),
-          pw.Paragraph(text: plan.resumenFinal),
+          pw.Header(
+            level: 1,
+            text: 'Resumen Final',
+            textStyle: pw.TextStyle(font: fontBold, fontSize: 14, color: _pdfSecondary),
+          ),
+          pw.Paragraph(text: plan.resumenFinal,
+              style: pw.TextStyle(font: fontRegular, fontSize: 11, lineSpacing: 3)),
         ],
       ),
     );

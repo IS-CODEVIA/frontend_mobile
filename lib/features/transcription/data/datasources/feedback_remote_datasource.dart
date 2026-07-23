@@ -25,7 +25,7 @@ class FeedbackRemoteDataSource {
       throw Exception('FEEDBACK_NOT_FOUND');
     }
     final errorBody = response.body.isNotEmpty ? response.body : 'sin respuesta';
-    throw Exception('Error del servidor ($response.statusCode): $errorBody');
+    throw Exception('Error del servidor (${response.statusCode}): $errorBody');
   }
 
   Future<FeedbackEntity> generateFeedback({
@@ -57,6 +57,6 @@ class FeedbackRemoteDataSource {
       return FeedbackModel.fromJson(data).toEntity();
     }
     final errorBody = response.body.isNotEmpty ? response.body : 'sin respuesta';
-    throw Exception('Error del servidor ($response.statusCode): $errorBody');
+    throw Exception('Error del servidor (${response.statusCode}): $errorBody');
   }
 }

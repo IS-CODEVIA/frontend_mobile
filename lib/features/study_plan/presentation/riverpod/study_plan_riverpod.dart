@@ -33,11 +33,16 @@ class StudyPlanNotifier extends Notifier<StudyPlanState> {
     state = const StudyPlanState(status: StudyPlanStatus.loading);
     try {
       final service = ref.read(_studyPlanServiceProvider);
-      final json = await service.generateStudyPlan(
+
+      await service.generateStudyPlan(
         userId: userId,
         sessionId: sessionId,
         topic: topic,
+        difficulty: 'intermedio',
+        durationHours: 10,
       );
+
+      final json = await service.getStudyPlan(sessionId);
       final plan = StudyPlanModel.fromJson(json);
       state = StudyPlanState(status: StudyPlanStatus.success, plan: plan);
     } catch (e) {
