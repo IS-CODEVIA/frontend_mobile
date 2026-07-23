@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/study_plan_model.dart';
 import '../../domain/entities/study_plan_entity.dart';
@@ -41,9 +42,9 @@ class FeedbackRemoteDataSource {
       body['study_plan'] = studyPlan;
     }
 
-    print('[FeedbackRemoteDataSource] POST $uri');
-    print('[FeedbackRemoteDataSource] session_id: $sessionId');
-    print('[FeedbackRemoteDataSource] body: ${jsonEncode(body)}');
+    debugPrint('[FeedbackRemoteDataSource] POST $uri');
+    debugPrint('[FeedbackRemoteDataSource] session_id: $sessionId');
+    debugPrint('[FeedbackRemoteDataSource] body: ${jsonEncode(body)}');
 
     final response = await http.post(
       uri,

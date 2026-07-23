@@ -33,6 +33,8 @@ class _OfflineFilesPageState extends ConsumerState<OfflineFilesPage> {
     switch (source) {
       case 'study_plan':
         return 'Plan de estudio';
+      case 'transcription':
+        return 'Transcripción';
       case 'material':
         return 'Material';
       default:
@@ -44,6 +46,8 @@ class _OfflineFilesPageState extends ConsumerState<OfflineFilesPage> {
     switch (source) {
       case 'study_plan':
         return Icons.menu_book_rounded;
+      case 'transcription':
+        return Icons.description_rounded;
       case 'material':
         return Icons.folder_outlined;
       default:

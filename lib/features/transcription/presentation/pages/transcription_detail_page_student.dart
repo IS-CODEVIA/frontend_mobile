@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,10 +5,12 @@ import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
 import '../../../auth/presentation/riverpod/auth_riverpod.dart';
+import '../../../offline_files/data/offline_files_service.dart';
 import '../../data/datasources/feedback_remote_datasource.dart';
 import '../../domain/entities/study_plan_entity.dart';
 import '../../domain/entities/transcription_entity.dart';
 import '../widgets/study_plan_section.dart';
+import '../widgets/transcription_pdf.dart';
 
 class TranscriptionDetailStudentPage extends ConsumerStatefulWidget {
   final TranscriptionEntity transcription;
@@ -64,25 +64,36 @@ class _TranscriptionDetailStudentPageState
     }
   }
 
-  void _downloadTranscription(BuildContext context) {
-    final title = widget.transcription.classTopic.isNotEmpty
-        ? widget.transcription.classTopic
-        : 'Transcripcion';
-    final sanitized = title.replaceAll(RegExp(r'[^\w\s]'), '');
-    final content =
-        '$title\n${widget.transcription.createdAt}\n\n${widget.transcription.fullText}';
-
+  Future<void> _downloadTranscription(BuildContext context) async {
     try {
-      final file = File('${Directory.systemTemp.path}/$sanitized.txt');
-      file.writeAsStringSync(content);
+      final bytes = await buildTranscriptionPdf(
+        transcription: widget.transcription,
+        subjectName: widget.subjectName,
+      );
+
+      final title = widget.transcription.classTopic.isNotEmpty
+          ? widget.transcription.classTopic
+          : 'Transcripcion';
+      final sanitized = title.replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(' ', '_');
+      final fileName =
+          'transcripcion_${sanitized}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+      await ref.read(offlineFilesServiceProvider).saveFile(
+            fileName: fileName,
+            bytes: bytes,
+            source: 'transcription',
+          );
+
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Transcripción descargada: $sanitized.txt'),
+          content: Text('Transcripción descargada: $fileName'),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
       );
     } catch (_) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error al descargar la transcripción'),

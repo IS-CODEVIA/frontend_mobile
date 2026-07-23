@@ -1,12 +1,36 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import '../../../offline_files/data/offline_files_service.dart';
 import '../../domain/entities/study_plan_entity.dart';
 import '../riverpod/study_plan_riverpod.dart';
+
+const _pdfPrimary = PdfColor.fromInt(0xff00CFBB);
+const _pdfSecondary = PdfColor.fromInt(0xff1C258F);
+
+pw.Widget _infoRow(String label, String value) {
+  return pw.Padding(
+    padding: const pw.EdgeInsets.symmetric(vertical: 2),
+    child: pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.SizedBox(
+          width: 110,
+          child: pw.Text(
+            label,
+            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700),
+          ),
+        ),
+        pw.Expanded(child: pw.Text(value, style: const pw.TextStyle(fontSize: 10))),
+      ],
+    ),
+  );
+}
+
+String _formatPdfDate(DateTime d) {
+  return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+}
 
 class StudyPlanModal extends ConsumerStatefulWidget {
   final String courseName;
@@ -63,17 +87,74 @@ class _StudyPlanModalState extends ConsumerState<StudyPlanModal> {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
-        build: (ctx) => [
-          pw.Header(
-            level: 0,
-            child: pw.Text('Plan de Estudio', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+        margin: const pw.EdgeInsets.fromLTRB(32, 90, 32, 48),
+        header: (ctx) => pw.Container(
+          padding: const pw.EdgeInsets.only(bottom: 12),
+          margin: const pw.EdgeInsets.only(bottom: 16),
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(bottom: pw.BorderSide(color: _pdfSecondary, width: 2)),
           ),
-          pw.SizedBox(height: 8),
-          pw.Text('Curso: ${widget.courseName}', style: const pw.TextStyle(fontSize: 14)),
-          pw.Text('Tema: ${plan.topic}', style: const pw.TextStyle(fontSize: 14)),
-          pw.Text('Dificultad: ${plan.difficulty}', style: const pw.TextStyle(fontSize: 14)),
-          pw.Text('Duración: ${plan.durationHours} horas', style: const pw.TextStyle(fontSize: 14)),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'Plan de Estudio',
+                    style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: _pdfSecondary),
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Text(widget.courseName, style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+                ],
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: pw.BoxDecoration(color: _pdfPrimary, borderRadius: pw.BorderRadius.circular(12)),
+                child: pw.Text(
+                  'SOA',
+                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+        footer: (ctx) => pw.Container(
+          margin: const pw.EdgeInsets.only(top: 8),
+          padding: const pw.EdgeInsets.only(top: 8),
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(top: pw.BorderSide(color: PdfColors.grey400, width: 0.5)),
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'Generado el ${_formatPdfDate(DateTime.now())}',
+                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+              ),
+              pw.Text(
+                'Página ${ctx.pageNumber} de ${ctx.pagesCount}',
+                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+              ),
+            ],
+          ),
+        ),
+        build: (ctx) => [
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(12),
+            decoration: pw.BoxDecoration(color: PdfColors.grey100, borderRadius: pw.BorderRadius.circular(8)),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                _infoRow('Curso', widget.courseName),
+                _infoRow('Tema', plan.topic),
+                _infoRow('Dificultad', plan.difficulty),
+                _infoRow('Duración', '${plan.durationHours} horas'),
+              ],
+            ),
+          ),
           pw.SizedBox(height: 16),
           pw.Header(level: 1, text: 'Introducción'),
           pw.Paragraph(text: plan.introduccion),
@@ -116,15 +197,13 @@ class _StudyPlanModalState extends ConsumerState<StudyPlanModal> {
       ),
     );
 
-    final dir = await getApplicationDocumentsDirectory();
     final fileName =
         'plan_estudio_${widget.courseName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(await pdf.save());
+    final bytes = await pdf.save();
 
     await ref.read(offlineFilesServiceProvider).saveFile(
       fileName: fileName,
-      bytes: await pdf.save(),
+      bytes: bytes,
       source: 'study_plan',
     );
 

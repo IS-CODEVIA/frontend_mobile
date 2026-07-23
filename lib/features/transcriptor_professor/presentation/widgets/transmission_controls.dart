@@ -205,7 +205,7 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
                   onTap: () async {
                     await notifier.stopTransmission();
                     if (!mounted) return;
-                    _showSaveSheet(context);
+                    _showSaveSheet(this.context);
                   },
                 ),
               ],
@@ -287,7 +287,7 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
                   onTap: () async {
                     await notifier.stopTransmission();
                     if (!mounted) return;
-                    _showSaveSheet(context);
+                    _showSaveSheet(this.context);
                   },
                 ),
               ],
