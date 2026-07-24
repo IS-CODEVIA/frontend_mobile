@@ -86,7 +86,7 @@ class ProfessorTranscriptionNotifier
   String _sessionIdForCourse(int courseId) => 'live:$courseId';
 
   Future<void> startTransmission(int courseId) async {
-    final user = ref.read(authViewModelProvider).user;
+    final user = ref.read(authViewModelProvider).asData?.value.user;
     if (user == null) {
       state = state.copyWith(error: 'Debes iniciar sesión primero');
       return;

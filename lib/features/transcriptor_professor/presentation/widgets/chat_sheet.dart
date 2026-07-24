@@ -91,7 +91,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
       }
     });
 
-    final students = peopleState.people
+    final students = (peopleState.asData?.value.people ?? <PersonModel>[])
         .where((p) => p.role == ClassRole.student)
         .toList();
     final activeContactId = chatState.activeContactId;

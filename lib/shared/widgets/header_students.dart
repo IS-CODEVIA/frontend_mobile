@@ -10,7 +10,7 @@ class HeaderStudents extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final avatarUrl = ref.watch(authViewModelProvider).user?.avatarUrl;
+    final avatarUrl = ref.watch(authViewModelProvider).asData?.value.user?.avatarUrl;
 
     return CustomPaint(
       painter: _HeaderPainter(

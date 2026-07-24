@@ -56,7 +56,7 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
     final isTablet = MediaQuery.of(context).size.width >= 600;
     final padding = horizontalPadding(context);
 
-    final materials =
+    final materialsAsync =
         ref.watch(studentMaterialsForCourseProvider(widget.courseId));
     final transcriptions =
         ref.watch(transcriptionsByCourseIdProvider(widget.courseId));
@@ -182,7 +182,11 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
                 ),
                 SizedBox(height: isTablet ? 24 : 16),
                 if (_selectedFilter != _ContentFilter.transcriptions)
-                  ..._buildMaterialsSection(colorScheme, textTheme, materials),
+                  ...materialsAsync.when(
+                    loading: () => [const Center(child: CircularProgressIndicator())],
+                    error: (e, _) => [Center(child: Text('Error: $e'))],
+                    data: (materials) => _buildMaterialsSection(colorScheme, textTheme, materials),
+                  ),
                 if (_selectedFilter != _ContentFilter.materials)
                   ..._buildTranscriptionsSection(
                       colorScheme, textTheme, transcriptions),
@@ -237,20 +241,23 @@ class _MaterialStudentsPageState extends ConsumerState<MaterialStudentsPage> {
     final result = <Widget>[];
     result.add(const SizedBox(height: 24));
     result.add(
-      Row(
-        children: [
-          Icon(Icons.menu_book_rounded,
-              color: colorScheme.secondary, size: 24),
-          const SizedBox(width: 8),
-          Text(
-            'Transcripciones de ${widget.subjectName}',
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.secondary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+                  Row(
+                    children: [
+                      Icon(Icons.menu_book_rounded,
+                          color: colorScheme.secondary, size: 24),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Transcripciones de ${widget.subjectName}',
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
     );
     result.add(const SizedBox(height: 16));
     if (transcriptions.isEmpty) {

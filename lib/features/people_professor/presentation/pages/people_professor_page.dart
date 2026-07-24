@@ -42,13 +42,8 @@ class _PeopleProfessorPageState extends ConsumerState<PeopleProfessorPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final state =
+    final peopleAsync =
         ref.watch(professorPeopleForCourseProvider(widget.courseId));
-
-    final teachers =
-        state.people.where((p) => p.role == ClassRole.teacher).toList();
-    final students =
-        state.people.where((p) => p.role == ClassRole.student).toList();
 
     return Scaffold(
       drawer: const NavbarProfessors(),
@@ -61,63 +56,76 @@ class _PeopleProfessorPageState extends ConsumerState<PeopleProfessorPage> {
         children: [
           const HeaderProfessors(),
           Expanded(
-            child: state.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    children: [
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.subjectName,
-                        style: textTheme.headlineMedium?.copyWith(
-                          color: colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (widget.joinCode != null &&
-                          widget.joinCode!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: colorScheme.outlineVariant),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.key_rounded,
-                                size: 16,
-                                color: colorScheme.secondary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Código de clase: ',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                widget.joinCode!,
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: colorScheme.secondary,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ],
+            child: peopleAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (state) {
+                final teachers = state.people.where((p) => p.role == ClassRole.teacher).toList();
+                final students = state.people.where((p) => p.role == ClassRole.student).toList();
+                return ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  children: [
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.subjectName,
+                            style: textTheme.headlineMedium?.copyWith(
+                              color: colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
-                      RoleSection(title: 'Profesor', people: teachers),
-                      RoleSection(title: 'Alumnos', people: students),
-                      const SizedBox(height: 40),
+                    ),
+                    if (widget.joinCode != null &&
+                        widget.joinCode!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: colorScheme.outlineVariant),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.key_rounded,
+                              size: 16,
+                              color: colorScheme.secondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Código de clase: ',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              widget.joinCode!,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: colorScheme.secondary,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
+                    RoleSection(title: 'Profesor', people: teachers),
+                    RoleSection(title: 'Alumnos', people: students),
+                    const SizedBox(height: 40),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),

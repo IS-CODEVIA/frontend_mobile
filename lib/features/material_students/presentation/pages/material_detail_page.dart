@@ -50,11 +50,14 @@ class MaterialDetailPage extends ConsumerWidget {
                       color: colorScheme.secondary,
                       onPressed: () => Navigator.pop(context),
                     ),
-                    Text(
-                      material.unitName,
-                      style: textTheme.titleLarge?.copyWith(
-                        color: colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        material.unitName,
+                        style: textTheme.titleLarge?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

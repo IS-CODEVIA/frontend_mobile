@@ -51,7 +51,7 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final state = ref.watch(homeStudentProvider);
+    final state = ref.watch(homeStudentProvider).asData?.value;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -129,10 +129,10 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
                 ),
               ],
             ),
-            if (state.joinError != null) ...[
+            if (state?.joinError != null) ...[
               const SizedBox(height: 12),
               Text(
-                state.joinError!,
+                state!.joinError!,
                 style: textTheme.bodySmall?.copyWith(color: colorScheme.error),
                 textAlign: TextAlign.center,
               ),
@@ -143,7 +143,7 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
               children: [
                 TextButton(
                   onPressed:
-                      state.isJoining ? null : () => Navigator.of(context).pop(),
+                      state?.isJoining == true ? null : () => Navigator.of(context).pop(),
                   child: Text(
                     'Cancelar',
                     style: textTheme.labelLarge?.copyWith(
@@ -153,7 +153,7 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
                 ),
                 const SizedBox(width: 12),
                 FilledButton(
-                  onPressed: state.isJoining ? null : _handleJoin,
+                  onPressed: state?.isJoining == true ? null : _handleJoin,
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.secondary,
                     foregroundColor: colorScheme.onSecondary,
@@ -165,7 +165,7 @@ class _JoinClassModalState extends ConsumerState<JoinClassModal> {
                       vertical: 12,
                     ),
                   ),
-                  child: state.isJoining
+                  child: state?.isJoining == true
                       ? const SizedBox(
                           width: 20,
                           height: 20,

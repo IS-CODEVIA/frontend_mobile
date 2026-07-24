@@ -13,21 +13,25 @@ final _getMaterialsUsecaseProvider = Provider<GetStudentMaterialsUsecase>(
   (ref) => ref.watch(_diProvider).getStudentMaterialsUsecase,
 );
 
-final studentMaterialsProvider = NotifierProvider<
+final studentMaterialsProvider = AsyncNotifierProvider<
     StudentMaterialsNotifier, Map<int, List<StudentMaterialEntity>>>(
   StudentMaterialsNotifier.new,
 );
 
 final studentMaterialsForCourseProvider =
-    Provider.family<List<StudentMaterialEntity>, int>((ref, courseId) {
+    Provider.family<AsyncValue<List<StudentMaterialEntity>>, int>((ref, courseId) {
   final all = ref.watch(studentMaterialsProvider);
-  return all[courseId] ?? [];
+  final map = all.asData?.value;
+  if (map == null) return const AsyncValue.loading();
+  final list = map[courseId];
+  if (list == null) return const AsyncValue.loading();
+  return AsyncValue.data(list);
 });
 
 class StudentMaterialsNotifier
-    extends Notifier<Map<int, List<StudentMaterialEntity>>> {
+    extends AsyncNotifier<Map<int, List<StudentMaterialEntity>>> {
   @override
-  Map<int, List<StudentMaterialEntity>> build() => {};
+  Future<Map<int, List<StudentMaterialEntity>>> build() async => {};
 
   Future<void> loadMaterials(int courseId) async {
     try {
@@ -35,7 +39,7 @@ class StudentMaterialsNotifier
         courseId: courseId,
       );
       materials.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      state = {...state, courseId: materials};
+      state = AsyncValue.data({...state.asData?.value ?? {}, courseId: materials});
     } catch (_) {}
   }
 }

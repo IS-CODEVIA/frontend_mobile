@@ -25,9 +25,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileProvider.notifier).loadProfile();
-    });
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -105,15 +102,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (!mounted) return;
 
-    final current = ref.read(profileProvider);
-    if (current.error == null) {
+    final current = ref.read(profileProvider).value;
+    if (current?.error == null) {
       setState(() => _pickedImagePath = null);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Foto de perfil actualizada')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${current.error}')),
+        SnackBar(content: Text('Error: ${current?.error}')),
       );
     }
   }
@@ -126,8 +123,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final state = ref.watch(profileProvider);
-    final authState = ref.watch(authViewModelProvider);
+    final profileAsync = ref.watch(profileProvider);
+    final authState = ref.watch(authViewModelProvider).requireValue;
     final isStudent = authState.isStudent;
 
     return Scaffold(
@@ -136,7 +133,35 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         children: [
           isStudent ? const HeaderStudents() : const HeaderProfessors(),
           Expanded(
-            child: _buildBody(state, textTheme, colorScheme),
+            child: profileAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+                      const SizedBox(height: 16),
+                      Text('Error al cargar perfil', style: textTheme.titleLarge),
+                      const SizedBox(height: 8),
+                      Text(
+                        '$e',
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: () => ref.invalidate(profileProvider),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reintentar'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              data: (state) => _buildBody(state, textTheme, colorScheme),
+            ),
           ),
         ],
       ),
@@ -148,44 +173,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     TextTheme textTheme,
     ColorScheme colorScheme,
   ) {
-    if (state.status == ProfileStatus.loading && state.profile == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.status == ProfileStatus.error && state.profile == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: colorScheme.error),
-              const SizedBox(height: 16),
-              Text(
-                'Error al cargar perfil',
-                style: textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                state.error ?? 'Error desconocido',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () =>
-                    ref.read(profileProvider.notifier).loadProfile(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Reintentar'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     final profile = state.profile;
     if (profile == null) return const SizedBox.shrink();
 

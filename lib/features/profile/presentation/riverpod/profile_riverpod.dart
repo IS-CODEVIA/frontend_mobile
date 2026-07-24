@@ -52,48 +52,31 @@ class ProfileState {
   }
 }
 
-class ProfileNotifier extends Notifier<ProfileState> {
+class ProfileNotifier extends AsyncNotifier<ProfileState> {
   @override
-  ProfileState build() => const ProfileState();
-
-  Future<void> loadProfile() async {
-    state = state.copyWith(status: ProfileStatus.loading, error: null);
-
+  Future<ProfileState> build() async {
     try {
       final profile = await ref.read(_getProfileUsecaseProvider)();
       ref.read(authViewModelProvider.notifier).updateAvatarUrl(profile.avatarUrl);
-      state = state.copyWith(
-        status: ProfileStatus.loaded,
-        profile: profile,
-      );
+      return ProfileState(status: ProfileStatus.loaded, profile: profile);
     } on Exception catch (e) {
-      state = state.copyWith(
-        status: ProfileStatus.error,
-        error: e.toString(),
-      );
+      return ProfileState(status: ProfileStatus.error, error: e.toString());
     }
   }
 
   Future<void> updateAvatar(File imageFile) async {
-    state = state.copyWith(isUploading: true, error: null);
+    state = AsyncValue.data(state.requireValue.copyWith(isUploading: true, error: null));
 
     try {
       final profile = await ref.read(_updateAvatarUsecaseProvider)(imageFile);
       ref.read(authViewModelProvider.notifier).updateAvatarUrl(profile.avatarUrl);
-      state = state.copyWith(
-        status: ProfileStatus.loaded,
-        profile: profile,
-        isUploading: false,
-      );
+      state = AsyncValue.data(state.requireValue.copyWith(status: ProfileStatus.loaded, profile: profile, isUploading: false));
     } on Exception catch (e) {
-      state = state.copyWith(
-        isUploading: false,
-        error: e.toString(),
-      );
+      state = AsyncValue.data(state.requireValue.copyWith(isUploading: false, error: e.toString()));
     }
   }
 }
 
-final profileProvider = NotifierProvider<ProfileNotifier, ProfileState>(
+final profileProvider = AsyncNotifierProvider<ProfileNotifier, ProfileState>(
   ProfileNotifier.new,
 );

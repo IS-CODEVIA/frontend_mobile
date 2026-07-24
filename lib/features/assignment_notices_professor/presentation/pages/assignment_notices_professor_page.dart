@@ -47,7 +47,7 @@ class _AssignmentNoticesProfessorPageState
     final isTablet = MediaQuery.of(context).size.width >= 600;
     final padding = horizontalPadding(context);
 
-    final state =
+    final noticesAsync =
         ref.watch(professorNoticesForCourseProvider(widget.courseId));
 
     return Scaffold(
@@ -67,13 +67,20 @@ class _AssignmentNoticesProfessorPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: isTablet ? 24 : 16),
-                  Text(
-                    widget.subjectName,
-                    style: textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: responsiveFontSize(context, isSmall ? 20 : 24),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.subjectName,
+                          style: textTheme.headlineMedium?.copyWith(
+                            color: colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: responsiveFontSize(context, isSmall ? 20 : 24),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                   if (widget.joinCode != null &&
                       widget.joinCode!.isNotEmpty) ...[
@@ -166,81 +173,80 @@ class _AssignmentNoticesProfessorPageState
                   ),
                   SizedBox(height: isTablet ? 24 : 16),
                   Expanded(
-                    child: state.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : state.error != null
-                            ? Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.error_outline,
-                                          size: isTablet ? 64 : 48,
-                                          color: colorScheme.error),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        state.error!,
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: colorScheme.error,
-                                          fontSize: responsiveFontSize(context, 14),
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextButton(
-                                        onPressed: () {
-                                          ref
-                                              .read(professorNoticesProvider
-                                                  .notifier)
-                                              .loadNotices(widget.courseId);
-                                        },
-                                        child: const Text('Reintentar'),
-                                      ),
-                                    ],
-                                  ),
+                    child: noticesAsync.when(
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, _) => Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.error_outline,
+                                  size: isTablet ? 64 : 48,
+                                  color: colorScheme.error),
+                              const SizedBox(height: 12),
+                              Text(
+                                error.toString(),
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.error,
+                                  fontSize: responsiveFontSize(context, 14),
                                 ),
-                              )
-                            : state.notices.isEmpty
-                                ? Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                            Icons.notifications_off_outlined,
-                                            size: isTablet ? 64 : 48,
-                                            color: colorScheme
-                                                .onSurfaceVariant),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          'No hay avisos',
-                                          style: textTheme.bodyLarge
-                                              ?.copyWith(
-                                            color: colorScheme
-                                                .onSurfaceVariant,
-                                            fontSize: responsiveFontSize(context, 16),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : RefreshIndicator(
-                                    onRefresh: () => ref
-                                        .read(professorNoticesProvider
-                                            .notifier)
-                                        .loadNotices(widget.courseId),
-                                    child: ListView.builder(
-                                      padding: EdgeInsets.only(
-                                          top: 8,
-                                          bottom: isTablet ? 40 : 24),
-                                      itemCount: state.notices.length,
-                                      itemBuilder: (context, index) {
-                                        return AssignmentNoticeProfessorCard(
-                                            notice:
-                                                state.notices[index]);
-                                      },
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () {
+                                  ref
+                                      .read(professorNoticesProvider.notifier)
+                                      .loadNotices(widget.courseId);
+                                },
+                                child: const Text('Reintentar'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      data: (state) => state.notices.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                      Icons.notifications_off_outlined,
+                                      size: isTablet ? 64 : 48,
+                                      color: colorScheme
+                                          .onSurfaceVariant),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No hay avisos',
+                                    style: textTheme.bodyLarge
+                                        ?.copyWith(
+                                      color: colorScheme
+                                          .onSurfaceVariant,
+                                      fontSize: responsiveFontSize(context, 16),
                                     ),
                                   ),
+                                ],
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: () => ref
+                                  .read(professorNoticesProvider.notifier)
+                                  .loadNotices(widget.courseId),
+                              child: ListView.builder(
+                                padding: EdgeInsets.only(
+                                    top: 8,
+                                    bottom: isTablet ? 40 : 24),
+                                itemCount: state.notices.length,
+                                itemBuilder: (context, index) {
+                                  return AssignmentNoticeProfessorCard(
+                                      notice:
+                                          state.notices[index]);
+                                },
+                              ),
+                            ),
+                    ),
                   ),
                 ],
               ),

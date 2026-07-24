@@ -27,53 +27,56 @@ class StudentNoticesState {
 }
 
 final studentNoticesProvider =
-    NotifierProvider<StudentNoticesNotifier, Map<int, StudentNoticesState>>(
+    AsyncNotifierProvider<StudentNoticesNotifier, Map<int, StudentNoticesState>>(
   StudentNoticesNotifier.new,
 );
 
 final studentNoticesForCourseProvider =
-    Provider.family<StudentNoticesState, int>((ref, courseId) {
+    Provider.family<AsyncValue<StudentNoticesState>, int>((ref, courseId) {
   final all = ref.watch(studentNoticesProvider);
-  return all[courseId] ?? const StudentNoticesState(isLoading: true);
+  final state = all.value?[courseId] ?? const StudentNoticesState(isLoading: true);
+  if (state.isLoading) return const AsyncValue.loading();
+  if (state.error != null) return AsyncValue.error(state.error!, StackTrace.current);
+  return AsyncValue.data(state);
 });
 
 class StudentNoticesNotifier
-    extends Notifier<Map<int, StudentNoticesState>> {
+    extends AsyncNotifier<Map<int, StudentNoticesState>> {
   @override
-  Map<int, StudentNoticesState> build() => {};
+  Future<Map<int, StudentNoticesState>> build() async => {};
 
   Future<void> loadNotices(int courseId) async {
-    state = {
-      ...state,
+    state = AsyncValue.data({
+      ...state.value ?? {},
       courseId: const StudentNoticesState(isLoading: true),
-    };
+    });
     try {
       final notices = await ref.read(_getNoticesUsecaseProvider)(
         courseId: courseId,
       );
       notices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      state = {
-        ...state,
+      state = AsyncValue.data({
+        ...state.value ?? {},
         courseId: StudentNoticesState(notices: notices),
-      };
+      });
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('loadNotices error: $e\n$st');
       }
-      state = {
-        ...state,
+      state = AsyncValue.data({
+        ...state.value ?? {},
         courseId: StudentNoticesState(error: e.toString()),
-      };
+      });
     }
   }
 
   void clearError(int courseId) {
-    final current = state[courseId];
+    final current = state.value?[courseId];
     if (current != null && current.error != null) {
-      state = {
-        ...state,
+      state = AsyncValue.data({
+        ...state.value ?? {},
         courseId: StudentNoticesState(notices: current.notices),
-      };
+      });
     }
   }
 }

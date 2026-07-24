@@ -62,7 +62,7 @@ class ChatNotifier extends Notifier<StudentChatState> {
   }
 
   Future<void> open(int courseId) async {
-    final user = ref.read(authViewModelProvider).user;
+    final user = ref.read(authViewModelProvider).asData?.value.user;
     if (user == null) {
       state = state.copyWith(error: 'Debes iniciar sesión primero');
       return;
@@ -71,10 +71,10 @@ class ChatNotifier extends Notifier<StudentChatState> {
     state = StudentChatState(isConnecting: true, myUserId: myUserId);
 
     // Resolver al docente del curso desde la lista de personas.
-    var people = ref.read(studentPeopleForCourseProvider(courseId)).people;
+    var people = ref.read(studentPeopleForCourseProvider(courseId)).asData?.value.people ?? [];
     if (people.isEmpty) {
       await ref.read(studentPeopleProvider.notifier).loadPeople(courseId);
-      people = ref.read(studentPeopleForCourseProvider(courseId)).people;
+      people = ref.read(studentPeopleForCourseProvider(courseId)).asData?.value.people ?? [];
     }
     PersonModel? teacher;
     for (final p in people) {

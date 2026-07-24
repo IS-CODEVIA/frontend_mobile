@@ -81,7 +81,7 @@ class SettingsProfessorPage extends ConsumerWidget {
 
   Widget _buildProfileCard(BuildContext context, ColorScheme colorScheme, TextTheme textTheme, WidgetRef ref) {
     final authState = ref.watch(authViewModelProvider);
-    final user = authState.user;
+    final user = authState.asData?.value.user;
     final avatarUrl = user?.avatarUrl;
 
     return GestureDetector(

@@ -52,7 +52,7 @@ class _ArchivedMaterialStudentsPageState
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final materials =
+    final materialsAsync =
         ref.watch(studentMaterialsForCourseProvider(widget.courseId));
     final transcriptions =
         ref.watch(transcriptionsByCourseIdProvider(widget.courseId));
@@ -71,18 +71,21 @@ class _ArchivedMaterialStudentsPageState
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               children: [
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Icon(Icons.folder_outlined,
-                        color: colorScheme.secondary, size: 24),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Material de ${widget.subjectName}',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Icon(Icons.folder_outlined,
+                          color: colorScheme.secondary, size: 24),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Material de ${widget.subjectName}',
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -153,7 +156,11 @@ class _ArchivedMaterialStudentsPageState
                 ),
                 const SizedBox(height: 16),
                 if (_selectedFilter != _ContentFilter.transcriptions)
-                  ..._buildMaterialsSection(colorScheme, textTheme, materials),
+                  ...materialsAsync.when(
+                    loading: () => [const Center(child: CircularProgressIndicator())],
+                    error: (e, _) => [Center(child: Text('Error: $e'))],
+                    data: (materials) => _buildMaterialsSection(colorScheme, textTheme, materials),
+                  ),
                 if (_selectedFilter != _ContentFilter.materials)
                   ..._buildTranscriptionsSection(
                       colorScheme, textTheme, transcriptions),

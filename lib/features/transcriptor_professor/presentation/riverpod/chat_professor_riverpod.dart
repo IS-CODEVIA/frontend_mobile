@@ -71,7 +71,7 @@ class ProfessorChatNotifier extends Notifier<ProfessorChatState> {
   }
 
   Future<void> open() async {
-    final user = ref.read(authViewModelProvider).user;
+    final user = ref.read(authViewModelProvider).asData?.value.user;
     if (user == null) {
       state = state.copyWith(error: 'Debes iniciar sesión primero');
       return;

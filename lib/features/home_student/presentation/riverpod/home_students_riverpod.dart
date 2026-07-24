@@ -61,14 +61,9 @@ class HomeStudentState {
   }
 }
 
-class HomeStudentNotifier extends Notifier<HomeStudentState> {
+class HomeStudentNotifier extends AsyncNotifier<HomeStudentState> {
   @override
-  HomeStudentState build() {
-    loadEnrollments();
-    return const HomeStudentState();
-  }
-
-  Future<void> loadEnrollments() async {
+  Future<HomeStudentState> build() async {
     try {
       final enrollments = await ref.read(_getMyEnrollmentsUsecaseProvider)();
       final subjects = enrollments
@@ -84,49 +79,47 @@ class HomeStudentNotifier extends Notifier<HomeStudentState> {
             ),
           )
           .toList();
-      state = state.copyWith(subjects: subjects, enrollments: enrollments);
+      return HomeStudentState(subjects: subjects, enrollments: enrollments);
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('loadEnrollments error: $e\n$st');
       }
-      state = state.copyWith(
-        error: e.toString(),
-      );
+      return HomeStudentState(error: e.toString());
     }
   }
 
   Future<JoinCourseEntity?> joinCourse(String joinCode) async {
-    state = state.copyWith(isJoining: true, joinError: null, joinResult: null);
+    state = AsyncValue.data(state.requireValue.copyWith(isJoining: true, joinError: null, joinResult: null));
     try {
       final result = await ref.read(_joinCourseUsecaseProvider)(joinCode);
-      state = state.copyWith(isJoining: false, joinResult: result);
-      loadEnrollments();
+      state = AsyncValue.data(state.requireValue.copyWith(isJoining: false, joinResult: result));
+      ref.invalidateSelf();
       return result;
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('joinCourse error: $e\n$st');
       }
-      state = state.copyWith(isJoining: false, joinError: e.toString());
+      state = AsyncValue.data(state.requireValue.copyWith(isJoining: false, joinError: e.toString()));
       return null;
     }
   }
 
   void clearJoinResult() {
-    state = state.copyWith(joinResult: null, joinError: null);
+    state = AsyncValue.data(state.requireValue.copyWith(joinResult: null, joinError: null));
   }
 }
 
 final homeStudentProvider =
-    NotifierProvider<HomeStudentNotifier, HomeStudentState>(
+    AsyncNotifierProvider<HomeStudentNotifier, HomeStudentState>(
   HomeStudentNotifier.new,
 );
 
 final subjectsProvider = Provider<List<SubjectModel>>((ref) {
-  return ref.watch(homeStudentProvider).subjects;
+  return ref.watch(homeStudentProvider).asData?.value.subjects ?? [];
 });
 
 final enrolledCoursesProvider = Provider<List<EnrolledCourseEntity>>((ref) {
-  return ref.watch(homeStudentProvider).enrollments;
+  return ref.watch(homeStudentProvider).asData?.value.enrollments ?? [];
 });
 
 final archivedEnrollmentsProvider = Provider<List<EnrolledCourseEntity>>((ref) {

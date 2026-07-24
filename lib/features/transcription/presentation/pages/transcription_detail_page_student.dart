@@ -104,7 +104,7 @@ class _TranscriptionDetailStudentPageState
   }
 
   Future<void> _generateFeedback() async {
-    final user = ref.read(authViewModelProvider).user;
+    final user = ref.read(authViewModelProvider).asData?.value.user;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

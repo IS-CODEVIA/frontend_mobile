@@ -12,7 +12,7 @@ class ProfileHeader extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final authState = ref.watch(authViewModelProvider);
-    final user = authState.user;
+    final user = authState.asData?.value.user;
     final avatarUrl = user?.avatarUrl;
 
     return GestureDetector(

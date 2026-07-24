@@ -25,15 +25,12 @@ class StudentPeopleState {
 }
 
 class StudentPeopleNotifier
-    extends Notifier<Map<int, StudentPeopleState>> {
+    extends AsyncNotifier<Map<int, StudentPeopleState>> {
   @override
-  Map<int, StudentPeopleState> build() => {};
+  Future<Map<int, StudentPeopleState>> build() async => {};
 
   Future<void> loadPeople(int courseId) async {
-    state = {
-      ...state,
-      courseId: const StudentPeopleState(isLoading: true),
-    };
+    state = AsyncValue.data({...state.value ?? {}, courseId: const StudentPeopleState(isLoading: true)});
     try {
       final detail = await ref.read(_getCourseDetailUsecaseProvider)(
         courseId: courseId,
@@ -54,29 +51,25 @@ class StudentPeopleNotifier
           ),
         ),
       ];
-      state = {
-        ...state,
-        courseId: StudentPeopleState(people: people),
-      };
+      state = AsyncValue.data({...state.value ?? {}, courseId: StudentPeopleState(people: people)});
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('loadPeople error: $e\n$st');
       }
-      state = {
-        ...state,
-        courseId: const StudentPeopleState(),
-      };
+      state = AsyncValue.data({...state.value ?? {}, courseId: const StudentPeopleState()});
     }
   }
 }
 
 final studentPeopleProvider =
-    NotifierProvider<StudentPeopleNotifier, Map<int, StudentPeopleState>>(
+    AsyncNotifierProvider<StudentPeopleNotifier, Map<int, StudentPeopleState>>(
   StudentPeopleNotifier.new,
 );
 
 final studentPeopleForCourseProvider =
-    Provider.family<StudentPeopleState, int>((ref, courseId) {
+    Provider.family<AsyncValue<StudentPeopleState>, int>((ref, courseId) {
   final all = ref.watch(studentPeopleProvider);
-  return all[courseId] ?? const StudentPeopleState(isLoading: true);
+  final state = all.value?[courseId] ?? const StudentPeopleState(isLoading: true);
+  if (state.isLoading) return const AsyncValue.loading();
+  return AsyncValue.data(state);
 });

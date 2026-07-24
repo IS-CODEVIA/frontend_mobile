@@ -59,7 +59,7 @@ class _MaterialProfessorPageState
     final isSmall = MediaQuery.of(context).size.width < 360;
     final padding = horizontalPadding(context);
 
-    final materials =
+    final materialsAsync =
         ref.watch(materialsByCourseIdProvider(widget.courseId));
     final transcriptions =
         ref.watch(transcriptionsByCourseIdProvider(widget.courseId));
@@ -148,12 +148,15 @@ class _MaterialProfessorPageState
                         color: colorScheme.secondary,
                         size: isTablet ? 28 : 24),
                     const SizedBox(width: 8),
-                    Text(
-                      'Material de ${widget.subjectName}',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: responsiveFontSize(context, 16),
+                    Expanded(
+                      child: Text(
+                        'Material de ${widget.subjectName}',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: responsiveFontSize(context, 16),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -229,7 +232,11 @@ class _MaterialProfessorPageState
                 ),
                 SizedBox(height: isTablet ? 24 : 16),
                 if (_selectedFilter != _ContentFilter.transcriptions)
-                  ..._buildMaterialsSection(colorScheme, textTheme, materials),
+                  ...materialsAsync.when(
+                    loading: () => [const Center(child: CircularProgressIndicator())],
+                    error: (e, _) => [Center(child: Text('Error: $e'))],
+                    data: (materials) => _buildMaterialsSection(colorScheme, textTheme, materials),
+                  ),
                 if (_selectedFilter != _ContentFilter.materials)
                   ..._buildTranscriptionsSection(
                       colorScheme, textTheme, transcriptions),
@@ -289,11 +296,14 @@ class _MaterialProfessorPageState
           Icon(Icons.menu_book_rounded,
               color: colorScheme.secondary, size: 24),
           const SizedBox(width: 8),
-          Text(
-            'Transcripciones de ${widget.subjectName}',
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.secondary,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              'Transcripciones de ${widget.subjectName}',
+              style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.secondary,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

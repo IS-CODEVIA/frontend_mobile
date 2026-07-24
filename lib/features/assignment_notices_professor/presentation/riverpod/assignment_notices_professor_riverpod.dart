@@ -31,44 +31,47 @@ class ProfessorNoticesState {
   });
 }
 
-final professorNoticesProvider = NotifierProvider<ProfessorNoticesNotifier,
+final professorNoticesProvider = AsyncNotifierProvider<ProfessorNoticesNotifier,
     Map<int, ProfessorNoticesState>>(
   ProfessorNoticesNotifier.new,
 );
 
 final professorNoticesForCourseProvider =
-    Provider.family<ProfessorNoticesState, int>((ref, courseId) {
+    Provider.family<AsyncValue<ProfessorNoticesState>, int>((ref, courseId) {
   final all = ref.watch(professorNoticesProvider);
-  return all[courseId] ?? const ProfessorNoticesState(isLoading: true);
+  final state = all.value?[courseId] ?? const ProfessorNoticesState(isLoading: true);
+  if (state.isLoading) return const AsyncValue.loading();
+  if (state.error != null) return AsyncValue.error(state.error!, StackTrace.current);
+  return AsyncValue.data(state);
 });
 
 class ProfessorNoticesNotifier
-    extends Notifier<Map<int, ProfessorNoticesState>> {
+    extends AsyncNotifier<Map<int, ProfessorNoticesState>> {
   @override
-  Map<int, ProfessorNoticesState> build() => {};
+  Future<Map<int, ProfessorNoticesState>> build() async => {};
 
   Future<void> loadNotices(int courseId) async {
-    state = {
-      ...state,
+    state = AsyncValue.data({
+      ...state.value ?? {},
       courseId: const ProfessorNoticesState(isLoading: true),
-    };
+    });
     try {
       final notices = await ref.read(_getNoticesUsecaseProvider)(
         courseId: courseId,
       );
       notices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      state = {
-        ...state,
+      state = AsyncValue.data({
+        ...state.value ?? {},
         courseId: ProfessorNoticesState(notices: notices),
-      };
+      });
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('loadNotices error: $e\n$st');
       }
-      state = {
-        ...state,
+      state = AsyncValue.data({
+        ...state.value ?? {},
         courseId: ProfessorNoticesState(error: e.toString()),
-      };
+      });
     }
   }
 
@@ -83,11 +86,11 @@ class ProfessorNoticesNotifier
         title: title,
         description: description,
       );
-      final current = state[courseId]?.notices ?? [];
-      state = {
-        ...state,
+      final current = state.value?[courseId]?.notices ?? [];
+      state = AsyncValue.data({
+        ...state.value ?? {},
         courseId: ProfessorNoticesState(notices: [...current, notice]),
-      };
+      });
       return notice;
     } catch (e, st) {
       if (kDebugMode) {

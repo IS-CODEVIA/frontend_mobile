@@ -18,11 +18,7 @@ final _registerUsecaseProvider = Provider<RegisterUsecase>((ref) {
   return ref.watch(_authDIProvider).registerUsecase;
 });
 
-enum AuthStatus {
-  initial,
-  unauthenticated,
-  authenticated,
-}
+enum AuthStatus { initial, unauthenticated, authenticated }
 
 class AuthState {
   final AuthStatus status;
@@ -71,53 +67,41 @@ class UserData {
   final int roleId;
   final String? avatarUrl;
 
-  const UserData({
-    required this.userId,
-    required this.name,
-    required this.email,
-    required this.roleId,
-    this.avatarUrl,
-  });
+  const UserData({required this.userId, required this.name, required this.email, required this.roleId, this.avatarUrl});
 }
 
-class AuthNotifier extends Notifier<AuthState> {
+class AuthNotifier extends AsyncNotifier<AuthState> {
   @override
-  AuthState build() => const AuthState();
+  Future<AuthState> build() async => const AuthState();
 
   void setRole(bool isStudent) {
-    state = state.copyWith(isStudent: isStudent);
+    state = AsyncValue.data(state.requireValue.copyWith(isStudent: isStudent));
   }
 
-  Future<void> login({
-    required String email,
-    required String password,
-  }) async {
-    state = state.copyWith(isLoading: true, error: null);
+  Future<void> login({required String email, required String password}) async {
+    final previous = state.requireValue;
+    state = const AsyncValue.loading();
 
     try {
-      final payload = await ref.read(_loginUsecaseProvider)(
-        email: email,
-        password: password,
-      );
+      final payload = await ref.read(_loginUsecaseProvider)(email: email, password: password);
       final storage = ref.read(appContainerProvider)!.tokenStorage;
       await storage.saveToken(payload.accessToken);
       await storage.saveRefreshToken(payload.refreshToken);
-      state = state.copyWith(
-        status: AuthStatus.authenticated,
-        isLoading: false,
-        user: UserData(
-          userId: payload.user.userId,
-          name: payload.user.name,
-          email: payload.user.email,
-          roleId: payload.user.roleId,
-          avatarUrl: payload.user.avatarUrl,
+      state = AsyncValue.data(
+        previous.copyWith(
+          status: AuthStatus.authenticated,
+          isLoading: false,
+          user: UserData(
+            userId: payload.user.userId,
+            name: payload.user.name,
+            email: payload.user.email,
+            roleId: payload.user.roleId,
+            avatarUrl: payload.user.avatarUrl,
+          ),
         ),
       );
     } on Exception catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
@@ -127,7 +111,8 @@ class AuthNotifier extends Notifier<AuthState> {
     required String password,
     required int roleId,
   }) async {
-    state = state.copyWith(isRegisterLoading: true, error: null);
+    final previous = state.requireValue;
+    state = const AsyncValue.loading();
 
     try {
       final payload = await ref.read(_registerUsecaseProvider)(
@@ -139,52 +124,52 @@ class AuthNotifier extends Notifier<AuthState> {
       final storage = ref.read(appContainerProvider)!.tokenStorage;
       await storage.saveToken(payload.accessToken);
       await storage.saveRefreshToken(payload.refreshToken);
-      state = state.copyWith(
-        isRegisterLoading: false,
-        isRegisterSuccess: true,
-        user: UserData(
-          userId: payload.user.userId,
-          name: payload.user.name,
-          email: payload.user.email,
-          roleId: payload.user.roleId,
-          avatarUrl: payload.user.avatarUrl,
+      state = AsyncValue.data(
+        previous.copyWith(
+          isRegisterLoading: false,
+          isRegisterSuccess: true,
+          user: UserData(
+            userId: payload.user.userId,
+            name: payload.user.name,
+            email: payload.user.email,
+            roleId: payload.user.roleId,
+            avatarUrl: payload.user.avatarUrl,
+          ),
         ),
       );
     } on Exception catch (e) {
-      state = state.copyWith(
-        isRegisterLoading: false,
-        error: e.toString(),
-      );
+      state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
   void clearRegisterSuccess() {
-    state = state.copyWith(isRegisterSuccess: false);
+    state = AsyncValue.data(state.requireValue.copyWith(isRegisterSuccess: false));
   }
 
   Future<void> logout() async {
     await ref.read(appContainerProvider)!.tokenStorage.clearTokens();
-    state = const AuthState(status: AuthStatus.unauthenticated);
+    state = AsyncValue.data(const AuthState(status: AuthStatus.unauthenticated));
   }
 
   void clearError() {
-    state = state.copyWith(error: null);
+    state = AsyncValue.data(state.requireValue.copyWith(error: null));
   }
 
   void updateAvatarUrl(String? avatarUrl) {
-    final current = state.user;
+    final current = state.requireValue.user;
     if (current == null) return;
-    state = state.copyWith(
-      user: UserData(
-        userId: current.userId,
-        name: current.name,
-        email: current.email,
-        roleId: current.roleId,
-        avatarUrl: avatarUrl,
+    state = AsyncValue.data(
+      state.requireValue.copyWith(
+        user: UserData(
+          userId: current.userId,
+          name: current.name,
+          email: current.email,
+          roleId: current.roleId,
+          avatarUrl: avatarUrl,
+        ),
       ),
     );
   }
 }
 
-final authViewModelProvider =
-    NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authViewModelProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
