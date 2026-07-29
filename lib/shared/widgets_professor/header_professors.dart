@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/riverpod/auth_riverpod.dart';
+import '../responsive/responsive_utils.dart';
 
 class HeaderProfessors extends ConsumerWidget {
   const HeaderProfessors({super.key});
@@ -11,6 +12,11 @@ class HeaderProfessors extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final avatarUrl = ref.watch(authViewModelProvider).asData?.value.user?.avatarUrl;
+    final landscape = isLandscape(context);
+    final headerHeight = responsiveHeaderHeight(context);
+    final logoHeight = headerHeight * (landscape ? 0.45 : 0.62);
+    final avatarRadius = landscape ? 18.0 : 24.0;
+    final iconSize = landscape ? 22.0 : 30.0;
 
     return CustomPaint(
       painter: _HeaderPainter(
@@ -20,9 +26,9 @@ class HeaderProfessors extends ConsumerWidget {
       child: SafeArea(
         bottom: false,
         child: SizedBox(
-          height: 110,
+          height: headerHeight,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.symmetric(horizontal: landscape ? 12.0 : 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,16 +39,16 @@ class HeaderProfessors extends ConsumerWidget {
                       icon: Icon(
                         Icons.menu,
                         color: colorScheme.onPrimary,
-                        size: 28,
+                        size: landscape ? 22 : 28,
                       ),
                       onPressed: () {
                         Scaffold.of(context).openDrawer();
                       },
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: landscape ? 4 : 8),
                     Image.asset(
                       'assets/images/up_logo_2.png',
-                      height: 68,
+                      height: logoHeight,
                       fit: BoxFit.contain,
                     ),
                   ],
@@ -56,7 +62,7 @@ class HeaderProfessors extends ConsumerWidget {
                       shape: BoxShape.circle,
                     ),
                     child: CircleAvatar(
-                      radius: 24,
+                      radius: avatarRadius,
                       backgroundColor: colorScheme.surfaceContainerHighest,
                       backgroundImage: avatarUrl != null
                           ? NetworkImage(avatarUrl)
@@ -64,7 +70,7 @@ class HeaderProfessors extends ConsumerWidget {
                       child: avatarUrl == null
                           ? Icon(
                               Icons.person,
-                              size: 30,
+                              size: iconSize,
                               color: colorScheme.outline,
                             )
                           : null,

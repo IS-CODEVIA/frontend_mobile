@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
 import '../../../../shared/widgets/header_students.dart';
 import '../../../../shared/widgets/nabvar_students.dart';
 import '../../../../shared/widgets/subject_bottom_nav.dart';
@@ -41,6 +42,8 @@ class _TranscriptorStudentPageState
     final textTheme = Theme.of(context).textTheme;
     final tState = ref.watch(transcriptionProvider);
     final notifier = ref.read(transcriptionProvider.notifier);
+    final landscape = isLandscape(context);
+    final padding = horizontalPadding(context);
 
     if (tState.error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -68,21 +71,22 @@ class _TranscriptorStudentPageState
           const HeaderStudents(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: EdgeInsets.symmetric(horizontal: padding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
+                  SizedBox(height: responsiveSpacing(context, 16)),
                   Text(
                     widget.subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
+                      fontSize: responsiveFontSize(context, landscape ? 20 : 24),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: responsiveSpacing(context, 8)),
                   const LiveStatusIndicator(),
-                  const SizedBox(height: 16),
+                  SizedBox(height: responsiveSpacing(context, 16)),
                   Expanded(
                     child: TranscriptionBox(
                       messages: displayMessages,
@@ -93,12 +97,11 @@ class _TranscriptorStudentPageState
                   Align(
                     alignment: Alignment.centerRight,
                     child: Padding(
-                      padding:
-                          const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                      padding: EdgeInsets.only(top: responsiveSpacing(context, 16), bottom: 8.0),
                       child: IconButton(
                         icon: const Icon(Icons.back_hand_outlined),
                         color: colorScheme.onSurface,
-                        iconSize: 32,
+                        iconSize: landscape ? 26 : 32,
                         onPressed: () {
                           showModalBottomSheet(
                             context: context,

@@ -45,6 +45,7 @@ class _AssignmentNoticesProfessorPageState
     final textTheme = Theme.of(context).textTheme;
     final isSmall = MediaQuery.of(context).size.width < 360;
     final isTablet = MediaQuery.of(context).size.width >= 600;
+    final landscape = isLandscape(context);
     final padding = horizontalPadding(context);
 
     final noticesAsync =
@@ -66,7 +67,7 @@ class _AssignmentNoticesProfessorPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: isTablet ? 24 : 16),
+                  SizedBox(height: landscape ? responsiveSpacing(context, 16) : (isTablet ? 24 : 16)),
                   Row(
                     children: [
                       Expanded(
@@ -75,7 +76,7 @@ class _AssignmentNoticesProfessorPageState
                           style: textTheme.headlineMedium?.copyWith(
                             color: colorScheme.secondary,
                             fontWeight: FontWeight.bold,
-                            fontSize: responsiveFontSize(context, isSmall ? 20 : 24),
+                            fontSize: responsiveFontSize(context, landscape ? 18 : (isSmall ? 20 : 24)),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -84,7 +85,7 @@ class _AssignmentNoticesProfessorPageState
                   ),
                   if (widget.joinCode != null &&
                       widget.joinCode!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: responsiveSpacing(context, 8)),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
@@ -99,16 +100,16 @@ class _AssignmentNoticesProfessorPageState
                         children: [
                           Icon(
                             Icons.key_rounded,
-                            size: 16,
+                            size: landscape ? 14 : 16,
                             color: colorScheme.secondary,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: landscape ? 4 : 8),
                           Flexible(
                             child: Text(
                               'Código de clase: ',
                               style: textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
-                                fontSize: responsiveFontSize(context, 14),
+                                fontSize: responsiveFontSize(context, landscape ? 12 : 14),
                               ),
                             ),
                           ),
@@ -119,7 +120,7 @@ class _AssignmentNoticesProfessorPageState
                                 color: colorScheme.secondary,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 2,
-                                fontSize: responsiveFontSize(context, 16),
+                                fontSize: responsiveFontSize(context, landscape ? 13 : 16),
                               ),
                             ),
                           ),
@@ -127,26 +128,26 @@ class _AssignmentNoticesProfessorPageState
                       ),
                     ),
                   ],
-                  SizedBox(height: isTablet ? 16 : 8),
+                  SizedBox(height: landscape ? responsiveSpacing(context, 8) : (isTablet ? 16 : 8)),
                   Row(
                     children: [
                       Icon(
                         Icons.mark_email_unread_outlined,
                         color: colorScheme.secondary,
-                        size: isTablet ? 28 : 24,
+                        size: landscape ? 20 : (isTablet ? 28 : 24),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: landscape ? 6 : 8),
                       Text(
                         'Avisos',
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.w600,
-                          fontSize: responsiveFontSize(context, 16),
+                          fontSize: responsiveFontSize(context, landscape ? 14 : 16),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: isTablet ? 16 : 12),
+                  SizedBox(height: landscape ? responsiveSpacing(context, 12) : (isTablet ? 16 : 12)),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -156,22 +157,22 @@ class _AssignmentNoticesProfessorPageState
                         widget.courseId,
                       ),
                       icon: Icon(Icons.add_rounded,
-                          size: isSmall ? 18 : 20),
+                          size: landscape ? 16 : (isSmall ? 18 : 20)),
                       label: Text('Nuevo anuncio',
                           style: TextStyle(
-                              fontSize: responsiveFontSize(context, 14))),
+                              fontSize: responsiveFontSize(context, landscape ? 12 : 14))),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xff008A7B),
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(
-                            vertical: isSmall ? 8 : 12),
+                            vertical: landscape ? 6 : (isSmall ? 8 : 12)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(height: isTablet ? 24 : 16),
+                  SizedBox(height: landscape ? responsiveSpacing(context, 16) : (isTablet ? 24 : 16)),
                   Expanded(
                     child: noticesAsync.when(
                       loading: () =>
@@ -183,18 +184,18 @@ class _AssignmentNoticesProfessorPageState
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.error_outline,
-                                  size: isTablet ? 64 : 48,
+                                  size: landscape ? 32 : (isTablet ? 64 : 48),
                                   color: colorScheme.error),
-                              const SizedBox(height: 12),
+                              SizedBox(height: responsiveSpacing(context, 12)),
                               Text(
                                 error.toString(),
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: colorScheme.error,
-                                  fontSize: responsiveFontSize(context, 14),
+                                  fontSize: responsiveFontSize(context, landscape ? 12 : 14),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: responsiveSpacing(context, 8)),
                               TextButton(
                                 onPressed: () {
                                   ref
@@ -214,17 +215,17 @@ class _AssignmentNoticesProfessorPageState
                                 children: [
                                   Icon(
                                       Icons.notifications_off_outlined,
-                                      size: isTablet ? 64 : 48,
+                                      size: landscape ? 32 : (isTablet ? 64 : 48),
                                       color: colorScheme
                                           .onSurfaceVariant),
-                                  const SizedBox(height: 12),
+                                  SizedBox(height: responsiveSpacing(context, 12)),
                                   Text(
                                     'No hay avisos',
                                     style: textTheme.bodyLarge
                                         ?.copyWith(
                                       color: colorScheme
                                           .onSurfaceVariant,
-                                      fontSize: responsiveFontSize(context, 16),
+                                      fontSize: responsiveFontSize(context, landscape ? 14 : 16),
                                     ),
                                   ),
                                 ],
@@ -237,7 +238,7 @@ class _AssignmentNoticesProfessorPageState
                               child: ListView.builder(
                                 padding: EdgeInsets.only(
                                     top: 8,
-                                    bottom: isTablet ? 40 : 24),
+                                    bottom: landscape ? 16 : (isTablet ? 40 : 24)),
                                 itemCount: state.notices.length,
                                 itemBuilder: (context, index) {
                                   return AssignmentNoticeProfessorCard(

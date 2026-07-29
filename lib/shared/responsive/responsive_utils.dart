@@ -37,3 +37,23 @@ double horizontalPadding(BuildContext context) {
   if (width > 600) return 48;
   return 32;
 }
+
+bool isLandscape(BuildContext context) =>
+    MediaQuery.of(context).orientation == Orientation.landscape;
+
+double responsiveHeaderHeight(BuildContext context) {
+  final h = MediaQuery.of(context).size.height;
+  if (isLandscape(context)) return (h * 0.22).clamp(70.0, 100.0);
+  return (h * 0.14).clamp(90.0, 130.0);
+}
+
+double responsiveBottomNavHeight(BuildContext context) {
+  final h = MediaQuery.of(context).size.height;
+  if (isLandscape(context)) return (h * 0.16).clamp(56.0, 80.0);
+  return (h * 0.10).clamp(64.0, 90.0);
+}
+
+double responsiveSpacing(BuildContext context, double baseSize) {
+  if (isLandscape(context)) return baseSize * 0.6;
+  return baseSize;
+}

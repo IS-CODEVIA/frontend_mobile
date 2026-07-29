@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../shared/responsive/responsive_utils.dart';
 import '../riverpod/transcription_professor_riverpod.dart';
 import 'save_transcription_sheet.dart';
 
@@ -74,54 +75,56 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
     ProfessorTranscriptionNotifier notifier,
   ) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.record_voice_over,
-              size: 50,
-              color: colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Transcripcion en vivo',
-            style: textTheme.titleLarge?.copyWith(
-              color: colorScheme.secondary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Inicia una transmision para transcribir tu clase',
-            textAlign: TextAlign.center,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 32),
-          FilledButton.icon(
-            onPressed: () => notifier.startTransmission(widget.courseId),
-            icon: const Icon(Icons.play_arrow, size: 28),
-            label: const Text('Comenzar transmision'),
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.record_voice_over,
+                size: 40,
+                color: colorScheme.primary,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              'Transcripcion en vivo',
+              style: textTheme.titleLarge?.copyWith(
+                color: colorScheme.secondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Inicia una transmision para transcribir tu clase',
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => notifier.startTransmission(widget.courseId),
+              icon: const Icon(Icons.play_arrow, size: 24),
+              label: const Text('Comenzar transmision'),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -132,37 +135,39 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
     ProfessorTranscriptionState tState,
     ProfessorTranscriptionNotifier notifier,
   ) {
+    final landscape = isLandscape(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'GRABANDO',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              if (tState.lastPartialText != null) ...[
+                SizedBox(height: responsiveSpacing(context, 16)),
                 Container(
-                  width: 12,
-                  height: 12,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'GRABANDO',
-                  style: textTheme.titleMedium?.copyWith(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            if (tState.lastPartialText != null) ...[
-              const SizedBox(height: 16),
-              Flexible(
-                child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  constraints: BoxConstraints(maxHeight: landscape ? 100 : 200),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
@@ -177,40 +182,42 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
                     ),
                   ),
                 ),
+              ],
+              SizedBox(height: responsiveSpacing(context, 16)),
+              if (tState.partialHistory.length > 1)
+                Text(
+                  '${tState.partialHistory.length} fragmentos recibidos',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              SizedBox(height: responsiveSpacing(context, 24)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _ControlButton(
+                    icon: Icons.pause_rounded,
+                    label: 'Pausar',
+                    color: colorScheme.tertiary,
+                    onTap: () => notifier.pauseTransmission(),
+                    landscape: landscape,
+                  ),
+                  SizedBox(width: landscape ? 12 : 24),
+                  _ControlButton(
+                    icon: Icons.stop_rounded,
+                    label: 'Terminar',
+                    color: Colors.red,
+                    onTap: () async {
+                      await notifier.stopTransmission();
+                      if (!mounted) return;
+                      _showSaveSheet(this.context);
+                    },
+                    landscape: landscape,
+                  ),
+                ],
               ),
             ],
-            const SizedBox(height: 16),
-            if (tState.partialHistory.length > 1)
-              Text(
-                '${tState.partialHistory.length} fragmentos recibidos',
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _ControlButton(
-                  icon: Icons.pause_rounded,
-                  label: 'Pausar',
-                  color: colorScheme.tertiary,
-                  onTap: () => notifier.pauseTransmission(),
-                ),
-                const SizedBox(width: 24),
-                _ControlButton(
-                  icon: Icons.stop_rounded,
-                  label: 'Terminar',
-                  color: Colors.red,
-                  onTap: () async {
-                    await notifier.stopTransmission();
-                    if (!mounted) return;
-                    _showSaveSheet(this.context);
-                  },
-                ),
-              ],
-            ),
-          ],
+          ),
         );
       },
     );
@@ -222,37 +229,39 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
     ProfessorTranscriptionState tState,
     ProfessorTranscriptionNotifier notifier,
   ) {
+    final landscape = isLandscape(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'PAUSADO',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              if (tState.lastPartialText != null) ...[
+                SizedBox(height: responsiveSpacing(context, 16)),
                 Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'PAUSADO',
-                  style: textTheme.titleMedium?.copyWith(
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            if (tState.lastPartialText != null) ...[
-              const SizedBox(height: 16),
-              Flexible(
-                child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  constraints: BoxConstraints(maxHeight: landscape ? 100 : 200),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
@@ -267,32 +276,34 @@ class _TransmissionControlsState extends ConsumerState<TransmissionControls> {
                     ),
                   ),
                 ),
+              ],
+              SizedBox(height: responsiveSpacing(context, 24)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _ControlButton(
+                    icon: Icons.play_arrow_rounded,
+                    label: 'Reanudar',
+                    color: colorScheme.primary,
+                    onTap: () => notifier.resumeTransmission(),
+                    landscape: landscape,
+                  ),
+                  SizedBox(width: landscape ? 12 : 24),
+                  _ControlButton(
+                    icon: Icons.stop_rounded,
+                    label: 'Terminar',
+                    color: Colors.red,
+                    onTap: () async {
+                      await notifier.stopTransmission();
+                      if (!mounted) return;
+                      _showSaveSheet(this.context);
+                    },
+                    landscape: landscape,
+                  ),
+                ],
               ),
             ],
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _ControlButton(
-                  icon: Icons.play_arrow_rounded,
-                  label: 'Reanudar',
-                  color: colorScheme.primary,
-                  onTap: () => notifier.resumeTransmission(),
-                ),
-                const SizedBox(width: 24),
-                _ControlButton(
-                  icon: Icons.stop_rounded,
-                  label: 'Terminar',
-                  color: Colors.red,
-                  onTap: () async {
-                    await notifier.stopTransmission();
-                    if (!mounted) return;
-                    _showSaveSheet(this.context);
-                  },
-                ),
-              ],
-            ),
-          ],
+          ),
         );
       },
     );
@@ -329,29 +340,34 @@ class _ControlButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final bool landscape;
 
   const _ControlButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
+    required this.landscape,
   });
 
   @override
   Widget build(BuildContext context) {
+    final size = landscape ? 48.0 : 64.0;
+    final iconSize = landscape ? 24.0 : 32.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 32),
+            child: Icon(icon, color: color, size: iconSize),
           ),
           const SizedBox(height: 8),
           Text(
@@ -359,7 +375,7 @@ class _ControlButton extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w600,
-              fontSize: 13,
+              fontSize: landscape ? 11 : 13,
             ),
           ),
         ],

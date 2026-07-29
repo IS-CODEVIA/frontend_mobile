@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/responsive/responsive_utils.dart';
 import '../../../../shared/widgets_professor/header_professors.dart';
 import '../../../../shared/widgets_professor/navbar_professors.dart';
 import '../../../../shared/widgets_professor/professor_subject_bottom_nav.dart';
@@ -24,6 +25,8 @@ class TranscriptorProfessorPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final landscape = isLandscape(context);
+    final padding = horizontalPadding(context);
 
     return Scaffold(
       drawer: const NavbarProfessors(),
@@ -37,20 +40,21 @@ class TranscriptorProfessorPage extends ConsumerWidget {
           const HeaderProfessors(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: EdgeInsets.symmetric(horizontal: padding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
+                  SizedBox(height: responsiveSpacing(context, 16)),
                   Text(
                     subjectName,
                     style: textTheme.headlineMedium?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.bold,
+                      fontSize: responsiveFontSize(context, landscape ? 20 : 24),
                     ),
                   ),
                   if (joinCode != null && joinCode!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: responsiveSpacing(context, 8)),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
@@ -65,14 +69,15 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                         children: [
                           Icon(
                             Icons.key_rounded,
-                            size: 16,
+                            size: landscape ? 14 : 16,
                             color: colorScheme.secondary,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: landscape ? 4 : 8),
                           Text(
                             'Código de clase: ',
                             style: textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
+                              fontSize: responsiveFontSize(context, landscape ? 12 : 14),
                             ),
                           ),
                           Text(
@@ -81,26 +86,28 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                               color: colorScheme.secondary,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
+                              fontSize: responsiveFontSize(context, landscape ? 14 : 16),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  SizedBox(height: responsiveSpacing(context, 8)),
                   Row(
                     children: [
                       Icon(
                         Icons.record_voice_over_outlined,
                         color: colorScheme.secondary,
-                        size: 24,
+                        size: landscape ? 20 : 24,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: landscape ? 6 : 8),
                       Text(
                         'Transcripcion en vivo',
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.w600,
+                          fontSize: responsiveFontSize(context, landscape ? 14 : 16),
                         ),
                       ),
                       const Spacer(),
@@ -108,7 +115,7 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                         icon: Icon(
                           Icons.chat_bubble_outline_rounded,
                           color: colorScheme.secondary,
-                          size: 28,
+                          size: landscape ? 22 : 28,
                         ),
                         tooltip: 'Ver mensajes de alumnos',
                         onPressed: () {
@@ -122,7 +129,7 @@ class TranscriptorProfessorPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: responsiveSpacing(context, 12)),
                   Expanded(
                     child: TransmissionControls(
                       subjectName: subjectName,

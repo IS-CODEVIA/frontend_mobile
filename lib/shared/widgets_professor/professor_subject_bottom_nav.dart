@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../responsive/responsive_utils.dart';
+
 class ProfessorSubjectBottomNav extends StatelessWidget {
   final String subjectName;
   final int courseId;
@@ -17,17 +19,20 @@ class ProfessorSubjectBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final landscape = isLandscape(context);
+    final navHeight = responsiveBottomNavHeight(context);
 
     final itemStyle = textTheme.labelLarge?.copyWith(
       color: Colors.white,
       fontWeight: FontWeight.w600,
+      fontSize: landscape ? 11 : 14,
     );
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: EdgeInsets.symmetric(horizontal: landscape ? 8.0 : 16.0, vertical: landscape ? 6.0 : 12.0),
         child: SizedBox(
-          height: 72,
+          height: navHeight,
           child: Row(
             children: [
               Expanded(
@@ -37,35 +42,62 @@ class ProfessorSubjectBottomNav extends StatelessWidget {
                     color: colorScheme.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _NavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {
-                        context.goNamed(
-                          'professor-assignment-notices',
-                          pathParameters: {'subjectName': subjectName},
-                          extra: {'courseId': courseId, 'joinCode': joinCode},
-                        );
-                      }),
-                      _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {
-                        context.goNamed(
-                          'professor-transcriptor',
-                          pathParameters: {'subjectName': subjectName},
-                          extra: {'courseId': courseId, 'joinCode': joinCode},
-                        );
-                      }),
-                      _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {
-                        context.goNamed(
-                          'professor-material-students',
-                          pathParameters: {'subjectName': subjectName},
-                          extra: {'courseId': courseId, 'joinCode': joinCode},
-                        );
-                      }),
-                    ],
-                  ),
+                  child: landscape
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _LandscapeNavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {
+                              context.goNamed(
+                                'professor-assignment-notices',
+                                pathParameters: {'subjectName': subjectName},
+                                extra: {'courseId': courseId, 'joinCode': joinCode},
+                              );
+                            }),
+                            _LandscapeNavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {
+                              context.goNamed(
+                                'professor-transcriptor',
+                                pathParameters: {'subjectName': subjectName},
+                                extra: {'courseId': courseId, 'joinCode': joinCode},
+                              );
+                            }),
+                            _LandscapeNavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {
+                              context.goNamed(
+                                'professor-material-students',
+                                pathParameters: {'subjectName': subjectName},
+                                extra: {'courseId': courseId, 'joinCode': joinCode},
+                              );
+                            }),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _NavItem(text: 'Avisos', icon: Icons.notifications_outlined, style: itemStyle, onTap: () {
+                              context.goNamed(
+                                'professor-assignment-notices',
+                                pathParameters: {'subjectName': subjectName},
+                                extra: {'courseId': courseId, 'joinCode': joinCode},
+                              );
+                            }),
+                            _NavItem(text: 'Transcriptor', icon: Icons.record_voice_over_outlined, style: itemStyle, onTap: () {
+                              context.goNamed(
+                                'professor-transcriptor',
+                                pathParameters: {'subjectName': subjectName},
+                                extra: {'courseId': courseId, 'joinCode': joinCode},
+                              );
+                            }),
+                            _NavItem(text: 'Material', icon: Icons.folder_outlined, style: itemStyle, onTap: () {
+                              context.goNamed(
+                                'professor-material-students',
+                                pathParameters: {'subjectName': subjectName},
+                                extra: {'courseId': courseId, 'joinCode': joinCode},
+                              );
+                            }),
+                          ],
+                        ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: landscape ? 6 : 12),
               Expanded(
                 flex: 1,
                 child: Container(
@@ -73,18 +105,31 @@ class ProfessorSubjectBottomNav extends StatelessWidget {
                     color: colorScheme.secondary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _NavItem(
-                    text: 'Personas',
-                    icon: Icons.people_outline,
-                    style: itemStyle,
-                    onTap: () {
-                      context.goNamed(
-                        'professor-people-student',
-                        pathParameters: {'subjectName': subjectName},
-                        extra: {'courseId': courseId, 'joinCode': joinCode},
-                      );
-                    },
-                  ),
+                  child: landscape
+                      ? _LandscapeNavItem(
+                          text: 'Personas',
+                          icon: Icons.people_outline,
+                          style: itemStyle,
+                          onTap: () {
+                            context.goNamed(
+                              'professor-people-student',
+                              pathParameters: {'subjectName': subjectName},
+                              extra: {'courseId': courseId, 'joinCode': joinCode},
+                            );
+                          },
+                        )
+                      : _NavItem(
+                          text: 'Personas',
+                          icon: Icons.people_outline,
+                          style: itemStyle,
+                          onTap: () {
+                            context.goNamed(
+                              'professor-people-student',
+                              pathParameters: {'subjectName': subjectName},
+                              extra: {'courseId': courseId, 'joinCode': joinCode},
+                            );
+                          },
+                        ),
                 ),
               ),
             ],
@@ -114,6 +159,33 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(icon, color: style?.color, size: 20),
             const SizedBox(height: 2),
+            Text(text, style: style?.copyWith(fontSize: 11)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LandscapeNavItem extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final TextStyle? style;
+  final VoidCallback onTap;
+
+  const _LandscapeNavItem({required this.text, required this.icon, required this.style, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: style?.color, size: 16),
+            const SizedBox(width: 4),
             Text(text, style: style?.copyWith(fontSize: 11)),
           ],
         ),
