@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class StudyPlanService {
-  static const _baseUrl = 'https://e6omtu6oi9j7p7-8080.proxy.runpod.net';
+  static const _baseUrl = 'https://qnjolupbqospfq-8080.proxy.runpod.net';
 
   Future<Map<String, dynamic>> generateStudyPlan({
     required String userId,

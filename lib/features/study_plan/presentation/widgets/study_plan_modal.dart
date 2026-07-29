@@ -7,7 +7,7 @@ import '../../../offline_files/data/offline_files_service.dart';
 import '../../domain/entities/study_plan_entity.dart';
 import '../riverpod/study_plan_riverpod.dart';
 
-const _pdfPrimary = PdfColor.fromInt(0xff00CFBB);
+const _pdfPrimary = PdfColor.fromInt(0xff008A7B);
 const _pdfSecondary = PdfColor.fromInt(0xff1C258F);
 
 pw.Widget _infoRow(String label, String value, pw.Font fontBold, pw.Font fontRegular) {

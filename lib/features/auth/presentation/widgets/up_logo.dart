@@ -9,9 +9,9 @@ class UpLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final logoSize = responsiveValue<double>(
       context,
-      mobile: 140,
-      tablet: 180,
-      desktop: 200,
+      mobile: 220,
+      tablet: 260,
+      desktop: 300,
     );
 
     return Column(

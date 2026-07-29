@@ -6,7 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../../../core/utils/pdf_fonts.dart';
 import '../../domain/entities/transcription_entity.dart';
 
-const _pdfPrimary = PdfColor.fromInt(0xff00CFBB);
+const _pdfPrimary = PdfColor.fromInt(0xff008A7B);
 const _pdfSecondary = PdfColor.fromInt(0xff1C258F);
 
 /// Builds a professionally formatted PDF for a class transcription.

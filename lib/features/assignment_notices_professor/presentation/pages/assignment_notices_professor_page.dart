@@ -161,7 +161,7 @@ class _AssignmentNoticesProfessorPageState
                           style: TextStyle(
                               fontSize: responsiveFontSize(context, 14))),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xff00CFBB),
+                        backgroundColor: const Color(0xff008A7B),
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(
                             vertical: isSmall ? 8 : 12),

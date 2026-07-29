@@ -427,7 +427,7 @@ class _SaveTranscriptionSheetState
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check_circle_rounded,
-                color: const Color(0xff00CFBB), size: 64),
+                color: const Color(0xff008A7B), size: 64),
             const SizedBox(height: 16),
             Text(
               'Clase guardada con exito',

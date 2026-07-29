@@ -42,7 +42,7 @@ class HeaderStudents extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Image.asset(
                       'assets/images/up_logo_2.png',
-                      height: 40,
+                      height: 68,
                       fit: BoxFit.contain,
                     ),
                   ],

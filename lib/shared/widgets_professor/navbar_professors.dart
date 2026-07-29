@@ -34,7 +34,7 @@ class NavbarProfessors extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 32.0, top: 32.0, bottom: 48.0),
               child: Image.asset(
                 'assets/images/up_logo_2.png',
-                height: 48,
+                height: 80,
                 fit: BoxFit.contain,
               ),
             ),

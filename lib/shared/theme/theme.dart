@@ -9,8 +9,8 @@ class MaterialTheme {
     return const ColorScheme(
       brightness: Brightness.light,
       
-      primary: Color(0xff00CFBB), 
-      surfaceTint: Color(0xff00CFBB),
+      primary: Color(0xff008A7B), 
+      surfaceTint: Color(0xff008A7B),
       onPrimary: Color(0xffffffff),
       primaryContainer: Color(0xffb3f5ed), // Tonalidad clara para contenedores
       onPrimaryContainer: Color(0xff003832),
@@ -68,9 +68,9 @@ class MaterialTheme {
     return const ColorScheme(
       brightness: Brightness.light,
       primary: Color(0xff008a7b),
-      surfaceTint: Color(0xff00CFBB),
+      surfaceTint: Color(0xff008A7B),
       onPrimary: Color(0xffffffff),
-      primaryContainer: Color(0xff00CFBB),
+      primaryContainer: Color(0xff008A7B),
       onPrimaryContainer: Color(0xffffffff),
       secondary: Color(0xff1C258F),
       onSecondary: Color(0xffffffff),
@@ -123,7 +123,7 @@ class MaterialTheme {
     return const ColorScheme(
       brightness: Brightness.light,
       primary: Color(0xff004d44),
-      surfaceTint: Color(0xff00CFBB),
+      surfaceTint: Color(0xff008A7B),
       onPrimary: Color(0xffffffff),
       primaryContainer: Color(0xff008a7b),
       onPrimaryContainer: Color(0xffffffff),
@@ -181,7 +181,7 @@ class MaterialTheme {
       primary: Color(0xff57e0ce),
       surfaceTint: Color(0xff57e0ce),
       onPrimary: Color(0xff003731),
-      primaryContainer: Color(0xff00CFBB), 
+      primaryContainer: Color(0xff008A7B), 
       onPrimaryContainer: Color(0xff00201c),
       
       secondary: Color(0xffb6c4ff),
@@ -361,7 +361,7 @@ class MaterialTheme {
 extension SubjectCardThemeX on ThemeData {
   Color subjectCardBackground(int seed) {
     const colors = <Color>[
-      Color(0xff00CFBB),
+      Color(0xff008A7B),
       Color(0xffC7622B),
       Color(0xff1C258F),
       Color(0xff006b60),

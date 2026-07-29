@@ -333,7 +333,7 @@ class _CreateMaterialSheetState extends ConsumerState<CreateMaterialSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check_circle_rounded,
-                color: const Color(0xff00CFBB), size: 64),
+                color: const Color(0xff008A7B), size: 64),
             const SizedBox(height: 16),
             Text(
               'Material subido con éxito',
