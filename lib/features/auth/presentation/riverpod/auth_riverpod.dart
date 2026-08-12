@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/app_container.dart';
+import '../../../../core/network/api_client.dart';
 import '../../di/auth_di.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
@@ -84,6 +85,16 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     try {
       final payload = await ref.read(_loginUsecaseProvider)(email: email, password: password);
+
+      final expectedRoleId = previous.isStudent ? 1 : 2;
+      if (payload.user.roleId != expectedRoleId) {
+        final selectedRole = previous.isStudent ? 'alumno' : 'docente';
+        final actualRole = payload.user.roleId == 1 ? 'alumno' : 'docente';
+        throw ApiException(
+          'No puedes iniciar sesión como $selectedRole. Tu cuenta está registrada como $actualRole.',
+        );
+      }
+
       final storage = ref.read(appContainerProvider)!.tokenStorage;
       await storage.saveToken(payload.accessToken);
       await storage.saveRefreshToken(payload.refreshToken);

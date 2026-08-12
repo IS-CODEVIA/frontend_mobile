@@ -193,7 +193,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                       return 'Correo no válido';
                                     }
                                     if (!value.trim().endsWith('.upchiapas.edu.mx')) {
-                                      return 'Usa tu correo institucional @upchiapas.edu.mx';
+                                      return 'Usa tu correo institucional .upchiapas.edu.mx';
                                     }
                                     return null;
                                   },
