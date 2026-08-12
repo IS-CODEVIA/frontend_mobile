@@ -118,7 +118,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value.trim())) {
                                       return 'Correo no válido';
                                     }
-                                    if (!value.trim().endsWith('@upchiapas.edu.mx')) {
+                                    if (!value.trim().endsWith('@')) {
                                       return 'Usa tu correo institucional @upchiapas.edu.mx';
                                     }
                                     return null;
