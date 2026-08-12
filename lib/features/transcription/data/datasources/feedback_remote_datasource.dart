@@ -5,7 +5,7 @@ import '../models/study_plan_model.dart';
 import '../../domain/entities/study_plan_entity.dart';
 
 class FeedbackRemoteDataSource {
-  static const _baseUrl = 'https://qnjolupbqospfq-8080.proxy.runpod.net';
+  static const _baseUrl = 'https://nnku666ihw18p6-8080.proxy.runpod.net';
 
   Future<FeedbackEntity> getFeedback({
     required String sessionId,
